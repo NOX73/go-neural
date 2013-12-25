@@ -2,9 +2,9 @@ package go_neural
 
 import "math/rand"
 
-func NewLayer (neurons int) *Layer {
+func NewLayer ( neurons int ) *Layer {
   l := &Layer{}
-  l.init(neurons)
+  l.init( neurons )
   return l
 }
 
@@ -20,7 +20,7 @@ func ( l *Layer ) ConnectTo ( layer *Layer ) {
   }
 }
 
-func ( l *Layer ) init (neurons int) {
+func ( l *Layer ) init ( neurons int ) {
   for ;neurons > 0; neurons-- { l.addNeuron() }
 }
 
