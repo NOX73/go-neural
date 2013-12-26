@@ -2,7 +2,7 @@ package neural
 
 type Enter struct {
   Synapses    []*Synapse
-  Input       float64
+  Input       float64 `json:"-"`
 }
 
 func NewEnter () *Enter {

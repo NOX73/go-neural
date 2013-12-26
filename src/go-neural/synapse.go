@@ -5,7 +5,7 @@ func NewSynapse (neuron *Neuron, weight float64) *Synapse {
 }
 
 type Synapse struct {
-  Neuron    *Neuron
+  Neuron    *Neuron `json:"-"`
   Weight    float64
 }
 

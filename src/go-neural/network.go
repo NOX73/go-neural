@@ -15,14 +15,14 @@ func NewNetwork(in int, layers []int) *Network {
 type Network struct {
   Enters      []*Enter
   Layers      []*Layer
-  Out         []float64
+  Out         []float64 `json:"-"`
 }
 
 func ( n *Network ) init (in int, layers []int, aFunc ActivationFunction) {
   n.initLayers(layers)
   n.initEnters(in)
-  n.connectLayers()
-  n.connectEnters()
+  n.ConnectLayers()
+  n.ConnectEnters()
   n.SetActivationFunction(aFunc)
 }
 
@@ -40,13 +40,13 @@ func ( n *Network ) initEnters (in int) {
   }
 }
 
-func ( n *Network ) connectLayers () {
+func ( n *Network ) ConnectLayers () {
   for i := len(n.Layers) - 1;i > 0;i-- {
     n.Layers[i-1].ConnectTo( n.Layers[i] )
   }
 }
 
-func ( n *Network ) connectEnters () {
+func ( n *Network ) ConnectEnters () {
   for _, e := range n.Enters {
     e.ConnectTo( n.Layers[0] )
   }

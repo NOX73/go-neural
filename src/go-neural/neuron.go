@@ -2,9 +2,9 @@ package neural
 
 type Neuron struct {
   Synapses    []*Synapse
-  Inputs      []float64
-  ActivationFunction  ActivationFunction
-  Out         float64
+  Inputs      []float64 `json:"-"`
+  ActivationFunction  ActivationFunction `json:"-"`
+  Out         float64 `json:"-"`
 }
 
 func NewNeuron () *Neuron {
