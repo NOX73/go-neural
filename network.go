@@ -49,9 +49,7 @@ func ( n *Network ) connectEnters () {
 }
 
 func ( n *Network ) EachLayer (f func(*Layer)) {
-  for _, l := range n.Layers {
-    f(l)
-  }
+  for _, l := range n.Layers { f(l) }
 }
 
 func ( n *Network ) SetActivationFunction ( aFunc ActivationFunction ) {

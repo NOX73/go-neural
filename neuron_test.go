@@ -12,7 +12,6 @@ func ( s *SuiteT ) TestAttachNeurons (c *C) {
   n.SynapseTo(n2, w)
 
   c.Assert( n.Synapses[0].Weight, Equals, w )
-
 }
 
 func ( s *SuiteT ) TestInputs (c *C) {
