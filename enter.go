@@ -1,7 +1,5 @@
 package go_neural
 
-import "math/rand"
-
 type Enter struct {
   Synapses    []*Synapse
   Input       float64
@@ -22,6 +20,6 @@ func ( e *Enter ) SetInput ( val float64 ) {
 
 func ( e *Enter ) ConnectTo ( layer *Layer ) {
   for _, n := range layer.Neurons {
-    e.SynapseTo(n, rand.Float64()*0.1 )
+    e.SynapseTo(n, 0)
   }
 }

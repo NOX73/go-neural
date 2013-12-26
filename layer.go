@@ -1,7 +1,5 @@
 package go_neural
 
-import "math/rand"
-
 func NewLayer ( neurons int ) *Layer {
   l := &Layer{}
   l.init( neurons )
@@ -15,7 +13,7 @@ type Layer struct {
 func ( l *Layer ) ConnectTo ( layer *Layer ) {
   for _, n := range l.Neurons {
     for _, toN := range layer.Neurons {
-      n.SynapseTo( toN, rand.Float64() * 0.1 )
+      n.SynapseTo( toN, 0 )
     }
   }
 }
@@ -27,4 +25,10 @@ func ( l *Layer ) init ( neurons int ) {
 func ( l *Layer ) addNeuron () {
   n := NewNeuron()
   l.Neurons = append( l.Neurons, n )
+}
+
+func ( l *Layer ) EachNeuron ( f func(*Neuron) ) {
+  for _, n := range l.Neurons {
+    f(n)
+  }
 }

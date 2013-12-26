@@ -22,9 +22,9 @@ func ( s *SuiteT ) TestInputs (c *C) {
   n.AppendInput(0.1)
   n.AppendInput(0.1)
 
-  c.Assert( len( n.Inputs ), Equals, 3 )
+  c.Assert( n.Inputs, HasLen, 3 )
 
   n.ResetInputs()
 
-  c.Assert( len( n.Inputs ), Equals, 0 )
+  c.Assert( n.Inputs, HasLen, 0 )
 }

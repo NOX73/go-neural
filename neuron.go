@@ -3,6 +3,7 @@ package go_neural
 type Neuron struct {
   Synapses    []*Synapse
   Inputs      []float64
+  ActivationFunction  ActivationFunction
 }
 
 func NewNeuron () *Neuron {
@@ -22,3 +23,6 @@ func ( n *Neuron ) AppendInput ( val float64 ) {
   n.Inputs = append( n.Inputs, val)
 }
 
+func ( n *Neuron ) SetActivationFunction ( aFunc ActivationFunction ) {
+  n.ActivationFunction = aFunc
+}

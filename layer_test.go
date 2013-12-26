@@ -6,7 +6,7 @@ import (
 
 func ( s *SuiteT ) TestLayer (c *C) {
   l := NewLayer(5)
-  c.Assert( len(l.Neurons), Equals, 5 )
+  c.Assert( l.Neurons, HasLen, 5 )
 }
 
 func ( s *SuiteT ) TestConnectToLayer (c *C) {
@@ -17,7 +17,7 @@ func ( s *SuiteT ) TestConnectToLayer (c *C) {
   l.ConnectTo(l2)
 
   for _, n := range l.Neurons {
-    c.Assert( len(n.Synapses), Equals, count )
+    c.Assert( n.Synapses, HasLen, count )
   }
 
 }
