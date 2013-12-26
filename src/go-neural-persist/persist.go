@@ -26,23 +26,14 @@ func FromFile ( path string ) *neural.Network {
 }
 
 func ToFile ( path string, n *neural.Network ) {
-  h := ToHash(n)
+  h := MarchalNetwork{Enters: len(n.Enters)}
+
+  for _, l := range n.Layers {
+    h.Layers = append(h.Layers, len(l.Neurons))
+  }
 
   j, _ := json.Marshal(h)
 
   err := ioutil.WriteFile(path, j, 0644)
   if err != nil { panic(err) }
-}
-
-type Hash map[string]interface{}
-
-func ToHash ( n *neural.Network ) MarchalNetwork {
-  h := MarchalNetwork{}
-
-  h.Enters = len(n.Enters)
-  for _, l := range n.Layers {
-    h.Layers = append(h.Layers, len(l.Neurons))
-  }
-
-  return h
 }
