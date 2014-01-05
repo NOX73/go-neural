@@ -8,4 +8,11 @@ test_neural:
 
 
 test_lern:
-	@( cd lern go test )
+	@( cd lern && go test )
+
+goget:
+	@( \
+		go get github.com/NOX73/go-neural; \
+		go get github.com/NOX73/go-neural/persist; \
+		go get github.com/NOX73/go-neural/lern; \
+	)
