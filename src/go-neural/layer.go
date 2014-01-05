@@ -27,12 +27,6 @@ func ( l *Layer ) addNeuron () {
   l.Neurons = append( l.Neurons, n )
 }
 
-func ( l *Layer ) resetInputs () {
-  for _, n := range l.Neurons {
-    n.ResetInputs()
-  }
-}
-
 func ( l *Layer ) Calculate () {
   for _, n := range l.Neurons {
     n.Calculate()

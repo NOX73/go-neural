@@ -11,19 +11,15 @@ func ( s *SuiteT ) TestAttachNeurons (c *C) {
 
   n.SynapseTo(n2, w)
 
-  c.Assert( n.Synapses[0].Weight, Equals, w )
+  c.Assert( n.OutSynapses[0].Weight, Equals, w )
 }
 
-func ( s *SuiteT ) TestInputs (c *C) {
+func ( s *SuiteT ) TestInputsSynapses (c *C) {
   n := NewNeuron()
 
-  n.AppendInput(0.1)
-  n.AppendInput(0.1)
-  n.AppendInput(0.1)
+  NewSynapseFromTo(NewNeuron(), n, 0.1)
+  NewSynapseFromTo(NewNeuron(), n, 0.1)
+  NewSynapseFromTo(NewNeuron(), n, 0.1)
 
-  c.Assert( n.Inputs, HasLen, 3 )
-
-  n.ResetInputs()
-
-  c.Assert( n.Inputs, HasLen, 0 )
+  c.Assert( n.InSynapses, HasLen, 3 )
 }

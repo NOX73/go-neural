@@ -25,8 +25,8 @@ func ( s *SuiteT ) TestPersist (c *C) {
 
   for i, l := range n2.Layers {
     for j, nr := range l.Neurons {
-      for h, s := range nr.Synapses {
-        c.Assert(s.Weight, Equals, n.Layers[i].Neurons[j].Synapses[h].Weight)
+      for h, s := range nr.OutSynapses {
+        c.Assert(s.Weight, Equals, n.Layers[i].Neurons[j].OutSynapses[h].Weight)
       }
     }
   }

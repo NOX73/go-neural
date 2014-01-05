@@ -1,44 +1,58 @@
 package persist
 
-import ( 
+import (
   "go-neural"
   "io/ioutil"
   "encoding/json"
-  //"log"
 )
+
+type Weights [][][]float64
+type Network struct {
+  Enters        int
+  Weights   Weights
+}
 
 func FromFile ( path string ) *neural.Network {
   b, err := ioutil.ReadFile(path)
   if err != nil { panic(err) }
 
-  n := &neural.Network{}
-  err = json.Unmarshal(b, n)
+  nDump := &Network{}
+  err = json.Unmarshal(b, nDump)
   if err != nil { panic(err) }
 
-  l := n.Layers[0]
-  for _, e := range n.Enters {
-    for i, s := range e.Synapses {
-      s.Neuron = l.Neurons[i]
-    }
+  layers := make([]int, len(nDump.Weights))
+  for i, layer := range nDump.Weights {
+    layers[i] = len(layer)
   }
 
+  n := neural.NewNetwork(nDump.Enters, layers)
+
   for i, l := range n.Layers {
-    if i+1 == len(n.Layers) {break}
-    l2 := n.Layers[i+1]
-    for _, n := range l.Neurons {
-      for j, s := range n.Synapses {
-        s.Neuron = l2.Neurons[j]
+    for j, n := range l.Neurons {
+      for k, s := range n.InSynapses {
+        s.Weight = nDump.Weights[i][j][k]
       }
     }
   }
-
-  n.SetActivationFunction(neural.NewLogisticFunc(1))
 
   return n
 }
 
 func ToFile ( path string, n *neural.Network ) {
-  j, _ := json.Marshal(n)
+
+  nDump := Network{Enters: len(n.Enters), Weights: make([][][]float64, len(n.Layers))}
+
+  for i, l := range n.Layers {
+    nDump.Weights[i] = make([][]float64, len(l.Neurons))
+    for j, n := range l.Neurons {
+      nDump.Weights[i][j] = make([]float64, len(n.InSynapses))
+      for k, s := range n.InSynapses {
+        nDump.Weights[i][j][k] = s.Weight
+      }
+    }
+  }
+
+  j, _ := json.Marshal(nDump)
 
   err := ioutil.WriteFile(path, j, 0644)
   if err != nil { panic(err) }

@@ -17,7 +17,7 @@ func ( s *SuiteT ) TestConnectToLayer (c *C) {
   l.ConnectTo(l2)
 
   for _, n := range l.Neurons {
-    c.Assert( n.Synapses, HasLen, count )
+    c.Assert( n.OutSynapses, HasLen, count )
   }
 
 }

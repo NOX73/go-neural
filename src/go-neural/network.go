@@ -72,13 +72,7 @@ func ( n *Network ) setEnters ( v *[]float64 ) {
 
 func ( n *Network ) sendEnters () {
   for _, e := range n.Enters {
-    e.sendSignal()
-  }
-}
-
-func ( n *Network ) resetInputs () {
-  for _, l := range n.Layers {
-    l.resetInputs()
+    e.Signal()
   }
 }
 
@@ -89,16 +83,16 @@ func ( n *Network ) calculateLayers () {
 }
 
 func ( n *Network ) generateOut () {
-  n.Out = n.Out[:0]
   outL := n.Layers[len(n.Layers)-1]
-  for _, neuron := range outL.Neurons {
-    n.Out = append(n.Out, neuron.Out)
+  n.Out = make([]float64, len(outL.Neurons)) 
+
+  for i, neuron := range outL.Neurons {
+    n.Out[i] = neuron.Out
   }
 }
 
 func ( n *Network ) Calculate( enters []float64 ) []float64 {
   n.setEnters(&enters)
-  n.resetInputs()
   n.sendEnters()
   n.calculateLayers()
   n.generateOut()
@@ -109,7 +103,7 @@ func ( n *Network ) Calculate( enters []float64 ) []float64 {
 func ( n *Network ) RandomizeSynapses () {
   for _, l := range n.Layers {
     for _, n := range l.Neurons {
-      for _, s := range n.Synapses {
+      for _, s := range n.InSynapses {
         s.Weight = 2 * (rand.Float64() - 0.5)
       }
     }

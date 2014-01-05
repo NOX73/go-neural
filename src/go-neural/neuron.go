@@ -1,10 +1,10 @@
 package neural
 
 type Neuron struct {
-  Synapses    []*Synapse
-  Inputs      []float64 `json:"-"`
-  ActivationFunction  ActivationFunction `json:"-"`
-  Out         float64 `json:"-"`
+  OutSynapses           []*Synapse
+  InSynapses            []*Synapse `json:"-"`
+  ActivationFunction    ActivationFunction `json:"-"`
+  Out                   float64 `json:"-"`
 }
 
 func NewNeuron () *Neuron {
@@ -12,16 +12,7 @@ func NewNeuron () *Neuron {
 }
 
 func ( n *Neuron ) SynapseTo ( nTo *Neuron, weight float64 ) {
-  syn := NewSynapse( nTo, weight )
-  n.Synapses = append( n.Synapses, syn )
-}
-
-func ( n *Neuron ) ResetInputs () {
-  n.Inputs = n.Inputs[:0]
-}
-
-func ( n *Neuron ) AppendInput ( val float64 ) {
-  n.Inputs = append( n.Inputs, val)
+  NewSynapseFromTo(n, nTo, weight)
 }
 
 func ( n *Neuron ) SetActivationFunction ( aFunc ActivationFunction ) {
@@ -30,11 +21,11 @@ func ( n *Neuron ) SetActivationFunction ( aFunc ActivationFunction ) {
 
 func ( n *Neuron ) Calculate () {
   var sum float64
-  for _, i := range n.Inputs { sum += i }
+  for _, s := range n.InSynapses { sum += s.Out }
 
   n.Out = n.ActivationFunction(sum)
 
-  for _, s := range n.Synapses {
-    s.sendSignal(n.Out)
+  for _, s := range n.OutSynapses {
+    s.Signal(n.Out)
   }
 }

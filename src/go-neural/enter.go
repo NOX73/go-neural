@@ -1,8 +1,8 @@
 package neural
 
 type Enter struct {
-  Synapses    []*Synapse
-  Input       float64 `json:"-"`
+  OutSynapses     []*Synapse
+  Input           float64 `json:"-"`
 }
 
 func NewEnter () *Enter {
@@ -10,8 +10,10 @@ func NewEnter () *Enter {
 }
 
 func ( e *Enter ) SynapseTo ( nTo *Neuron, weight float64 ) {
-  syn := NewSynapse( nTo, weight )
-  e.Synapses = append( e.Synapses, syn )
+  syn := NewSynapse( weight )
+
+  e.OutSynapses = append( e.OutSynapses, syn )
+  nTo.InSynapses = append( nTo.InSynapses, syn )
 }
 
 func ( e *Enter ) SetInput ( val float64 ) {
@@ -24,8 +26,8 @@ func ( e *Enter ) ConnectTo ( layer *Layer ) {
   }
 }
 
-func ( e *Enter ) sendSignal () {
-  for _, s := range e.Synapses {
-    s.sendSignal(e.Input)
+func ( e *Enter ) Signal () {
+  for _, s := range e.OutSynapses {
+    s.Signal(e.Input)
   }
 }
