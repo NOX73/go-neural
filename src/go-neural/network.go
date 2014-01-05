@@ -110,7 +110,7 @@ func ( n *Network ) RandomizeSynapses () {
   for _, l := range n.Layers {
     for _, n := range l.Neurons {
       for _, s := range n.Synapses {
-        s.Weight = rand.Float64() * 0.1
+        s.Weight = 2 * (rand.Float64() - 0.5)
       }
     }
   }
