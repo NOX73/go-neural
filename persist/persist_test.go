@@ -3,7 +3,7 @@ package persist
 import (
   "testing"
   . "launchpad.net/gocheck"
-  "go-neural"
+  "github.com/NOX73/go-neural"
 )
 
 func Test(t *testing.T) { TestingT(t) }

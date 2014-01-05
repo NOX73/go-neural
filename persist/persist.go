@@ -1,7 +1,7 @@
 package persist
 
 import (
-  "go-neural"
+  "github.com/NOX73/go-neural"
   "io/ioutil"
   "encoding/json"
 )

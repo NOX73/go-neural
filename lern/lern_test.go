@@ -3,10 +3,8 @@ package lern
 import (
   "testing"
   . "launchpad.net/gocheck"
-  "go-neural"
-  //"go-neural-persist"
+  "github.com/NOX73/go-neural"
   "math/rand"
-  //"log"
 )
 
 

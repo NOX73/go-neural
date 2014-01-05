@@ -1,7 +1,7 @@
 package lern
 
 import (
-  "go-neural"
+  "github.com/NOX73/go-neural"
   "math"
 )
 
