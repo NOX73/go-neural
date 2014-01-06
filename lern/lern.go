@@ -6,6 +6,11 @@ import (
 
 type Deltas [][]float64
 
+type Sample struct {
+  In    []float64
+  Ideal []float64
+}
+
 func Lern ( n *neural.Network, in, ideal []float64, speed float64 ) {
   Backpropagation(n, in, ideal, speed)
 }
