@@ -19,7 +19,9 @@ Create new network:
 
   //...
 
-  // Network has 9 enters and 3 layers ( 9 neurons, 9 neurons and 4 neurons). Last layer is network output.
+  // Network has 9 enters and 3 layers 
+  // ( 9 neurons, 9 neurons and 4 neurons).
+  // Last layer is network output.
   n := neural.NewNetwork(9, []int{9,9,4})
   // Randomize sypaseses weights
   n.RandomizeSynapses()
