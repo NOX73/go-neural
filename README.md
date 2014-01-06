@@ -66,12 +66,5 @@ You can get estimate of lerning quality:
 
 # Live example
 
-Dirty live example you can find here[https://github.com/NOX73/go-neural-play]
-
-
-
-
-
-
-
+Dirty live example: [https://github.com/NOX73/go-neural-play]
 
