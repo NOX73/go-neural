@@ -1,13 +1,14 @@
 package neural
 
 import (
-  "testing"
-  . "launchpad.net/gocheck"
+	. "launchpad.net/gocheck"
+	"testing"
 )
 
 func Test(t *testing.T) { TestingT(t) }
-type SuiteT struct { }
-func (s *SuiteT) SetUpTest (c *C) { }
-var _ = Suite( &SuiteT{} )
 
+type SuiteT struct{}
 
+func (s *SuiteT) SetUpTest(c *C) {}
+
+var _ = Suite(&SuiteT{})
