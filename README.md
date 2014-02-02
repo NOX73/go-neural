@@ -66,6 +66,20 @@ You can get estimate of lerning quality:
   e := lern.Evaluation(network, in, idealOut)
 ```
 
+# Engine 
+
+For concurrent lern, calculate & dump neural network.
+
+```go
+	network := neural.NewNetwork(2, []int{2, 2})
+	engine := New(network)
+	engine.Start()
+
+	engine.Lern([]float64{1, 2}, []float64{3, 3}, 0.1)
+
+	out := engine.Calculate([]float64{1, 2})
+```
+
 # Live example
 
 Dirty live example: [https://github.com/NOX73/go-neural-play]
