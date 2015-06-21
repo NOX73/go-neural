@@ -48,7 +48,7 @@ Load from file:
   network := persist.FromFile("/path/to/file.json")
 ```
 
-# Lerning
+# Learning
 
 ```go
   import "github.com/NOX73/gr-neural-lern"
