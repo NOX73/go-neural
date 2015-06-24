@@ -12,7 +12,7 @@ func TestBasic(t *testing.T) {
 	engine := New(network)
 	engine.Start()
 
-	engine.Lern([]float64{1, 2}, []float64{3, 3}, 0.1)
+	engine.Learn([]float64{1, 2}, []float64{3, 3}, 0.1)
 
 	out := engine.Calculate([]float64{1, 2})
 

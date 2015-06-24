@@ -1,4 +1,4 @@
-package lern
+package learn
 
 import (
 	"github.com/NOX73/go-neural"
@@ -11,7 +11,7 @@ type Sample struct {
 	Ideal []float64
 }
 
-func Lern(n *neural.Network, in, ideal []float64, speed float64) {
+func Learn(n *neural.Network, in, ideal []float64, speed float64) {
 	Backpropagation(n, in, ideal, speed)
 }
 

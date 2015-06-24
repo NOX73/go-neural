@@ -1,4 +1,4 @@
-package lern
+package learn
 
 import (
 	"github.com/NOX73/go-neural"
