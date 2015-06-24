@@ -1,4 +1,4 @@
-package lern
+package learn
 
 import (
 	"github.com/NOX73/go-neural"
@@ -45,7 +45,7 @@ func (s *SuiteT) SetUpTest(c *C) {}
 
 var _ = Suite(&SuiteT{})
 
-func (s *SuiteT) TestLern(c *C) {
+func (s *SuiteT) TestLearn(c *C) {
 
 	n := neural.NewNetwork(2, []int{5, 5, 2})
 	n.RandomizeSynapses()
@@ -58,7 +58,7 @@ func (s *SuiteT) TestLern(c *C) {
 		} else {
 			ideal = []float64{0, 1}
 		}
-		Lern(n, in, ideal, 0.1)
+		Learn(n, in, ideal, 0.1)
 	}
 
 	count := 1000

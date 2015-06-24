@@ -2,26 +2,26 @@ package engine
 
 import (
 	"github.com/NOX73/go-neural"
-	"github.com/NOX73/go-neural/lern"
+	"github.com/NOX73/go-neural/learn"
 	"github.com/NOX73/go-neural/persist"
 )
 
 const (
-	lernChannelCapacity = 5
+	learnChannelCapacity = 5
 	calcChannelCapacity = 5
 	dumpChannelCapacity = 5
 )
 
 type Engine interface {
 	Start()
-	Lern(in, ideal []float64, speed float64)
+	Learn(in, ideal []float64, speed float64)
 	Calculate([]float64) []float64
 	Dump() *persist.NetworkDump
 }
 
 type engine struct {
 	Network          *neural.Network
-	LernChannel      chan *request
+	LearnChannel      chan *request
 	CalculateChannel chan *request
 	DumpChannel      chan *request
 }
@@ -31,7 +31,7 @@ type request []interface{}
 func New(n *neural.Network) Engine {
 	e := &engine{
 		Network:          n,
-		LernChannel:      make(chan *request, lernChannelCapacity),
+		LearnChannel:      make(chan *request, lernChannelCapacity),
 		CalculateChannel: make(chan *request, calcChannelCapacity),
 		DumpChannel:      make(chan *request, dumpChannelCapacity),
 	}
@@ -43,8 +43,8 @@ func (e *engine) Start() {
 	go e.loop()
 }
 
-func (e *engine) Lern(in, ideal []float64, speed float64) {
-	e.LernChannel <- &request{&in, &ideal, speed}
+func (e *engine) Learn(in, ideal []float64, speed float64) {
+	e.LearnChannel <- &request{&in, &ideal, speed}
 }
 
 func (e *engine) Calculate(in []float64) []float64 {
@@ -75,20 +75,20 @@ func (e *engine) loop() {
 			e.dump(r)
 		case r := <-e.CalculateChannel:
 			e.calculate(r)
-		case r := <-e.LernChannel:
-			e.lern(r)
+		case r := <-e.LearnChannel:
+			e.learn(r)
 		}
 
 	}
 }
 
-func (e *engine) lern(req *request) {
+func (e *engine) learn(req *request) {
 	r := *req
 
 	in := r[0].(*[]float64)
 	ideal := r[1].(*[]float64)
 	speed := r[2].(float64)
-	lern.Lern(e.Network, *in, *ideal, speed)
+	learn.Learn(e.Network, *in, *ideal, speed)
 }
 
 func (e *engine) calculate(req *request) {
