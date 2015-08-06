@@ -31,7 +31,7 @@ type request []interface{}
 func New(n *neural.Network) Engine {
 	e := &engine{
 		Network:          n,
-		LearnChannel:      make(chan *request, lernChannelCapacity),
+		LearnChannel:      make(chan *request, learnChannelCapacity),
 		CalculateChannel: make(chan *request, calcChannelCapacity),
 		DumpChannel:      make(chan *request, dumpChannelCapacity),
 	}

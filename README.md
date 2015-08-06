@@ -35,7 +35,7 @@ Create new network:
 Save to file:
 
 ```go
-  import "github.com/NOX73/gr-neural-persist"
+  import "github.com/NOX73/or-neural/persist"
 
   persist.ToFile("/path/to/file.json", network)
 ```
@@ -43,7 +43,7 @@ Save to file:
 Load from file:
 
 ```go
-  import "github.com/NOX73/gr-neural-persist"
+  import "github.com/NOX73/go-neural/persist"
 
   network := persist.FromFile("/path/to/file.json")
 ```
@@ -51,7 +51,7 @@ Load from file:
 # Learning
 
 ```go
-  import "github.com/NOX73/gr-neural-learn"
+  import "github.com/NOX73/go-neural/learn"
 
   var input, idealOutput []float64
   // Learning speed [0..1]

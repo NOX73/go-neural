@@ -1,4 +1,4 @@
-test: test_neural test_persist test_lern test_engine
+test: test_neural test_persist test_learn test_engine
 
 test_persist:
 	@( go test ./persist/ )
