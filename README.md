@@ -25,9 +25,9 @@ Create new network:
   n := neural.NewNetwork(9, []int{9,9,4})
   // Randomize sypaseses weights
   n.RandomizeSynapses()
-  
-  result := n.Calucate([]float64{0,1,0,1,1,1,0,1,0})
-  
+
+  result := n.Calculate([]float64{0,1,0,1,1,1,0,1,0})
+
 ```
 
 # Persist network
@@ -35,7 +35,7 @@ Create new network:
 Save to file:
 
 ```go
-  import "github.com/NOX73/or-neural/persist"
+  import "github.com/NOX73/go-neural/persist"
 
   persist.ToFile("/path/to/file.json", network)
 ```
