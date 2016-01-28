@@ -19,16 +19,14 @@ Create new network:
 
   //...
 
-  // Network has 9 enters and 3 layers 
+  // Network has 9 enters and 3 layers
   // ( 9 neurons, 9 neurons and 4 neurons).
   // Last layer is network output.
   n := neural.NewNetwork(9, []int{9,9,4})
   // Randomize sypaseses weights
   n.RandomizeSynapses()
 
-  result := n.Calculate([]float64{0,1,0,1,1,1,0,1,0})
-
-```
+  result := n.Caculate([]float64{0,1,0,1,1,1,0,1,0})
 
 # Persist network
 
@@ -66,7 +64,7 @@ You can get estimate of learning quality:
   e := learn.Evaluation(network, in, idealOut)
 ```
 
-# Engine 
+# Engine
 
 For concurrent learn, calculate & dump neural network.
 
