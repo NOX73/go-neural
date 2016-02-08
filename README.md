@@ -26,7 +26,7 @@ Create new network:
   // Randomize sypaseses weights
   n.RandomizeSynapses()
   
-  result := n.Calucate([]float64{0,1,0,1,1,1,0,1,0})
+  result := n.Calculate([]float64{0,1,0,1,1,1,0,1,0})
   
 ```
 
