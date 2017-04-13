@@ -3,7 +3,7 @@ package evaluation
 import (
 	"math"
 
-	neural "github.com/NOX73/go-neural"
+	neural "github.com/flezzfx/gopher-neural"
 )
 
 // TODO (abresk) confusion matrix handling
