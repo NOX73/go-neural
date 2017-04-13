@@ -13,11 +13,13 @@ This code was partly taken from github.com/NOX73/go-neural. For the implementati
 * Changed I/O handling for JSON models
 * Added Sample and Set structure for handling of data sets
 * Implement rich measurements for the evaluation of the classifier
+* Simple data I/O for training / testing and libSVM and csv format
+* Added labels to output neurons in network and persist
+* Just output label of neuron with most confidence
 
 ### Roadmap
 
-* Simple data I/O for training / testing and libSVM and csv format
-* Add labels to output neurons in network (also persist)
+* Add ranking of classes ordered by confidence
 * Establish a learning framework as engine package (using epochs, decays, interraters)
 * Provide another repository using example projects including data
 * Implement rich measurements for the evaluation of regressors
