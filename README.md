@@ -19,8 +19,8 @@ This code was partly taken from github.com/NOX73/go-neural. For the implementati
 
 ### Roadmap
 
-* Add ranking of classes ordered by confidence
 * Establish a learning framework as engine package (using epochs, decays, interraters)
+* Confusion matrix handling
 * Provide another repository using example projects including data
 * Implement rich measurements for the evaluation of regressors
 * Pipelined learning in channels to find the optimum

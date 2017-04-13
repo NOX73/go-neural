@@ -2,14 +2,16 @@ package persist
 
 import (
 	"encoding/json"
-	"github.com/NOX73/go-neural"
 	"io/ioutil"
+
+	"github.com/flezzfx/gopher-neural"
 )
 
 type Weights [][][]float64
 type NetworkDump struct {
-	Enters  int
-	Weights Weights
+	Enters    int
+	Weights   Weights
+	OutLabels map[int]string
 }
 
 func DumpFromFile(path string) (*NetworkDump, error) {
@@ -48,7 +50,7 @@ func DumpToFile(path string, dump *NetworkDump) error {
 
 func ToDump(n *neural.Network) *NetworkDump {
 
-	dump := &NetworkDump{Enters: len(n.Enters), Weights: make([][][]float64, len(n.Layers))}
+	dump := &NetworkDump{Enters: len(n.Enters), Weights: make([][][]float64, len(n.Layers)), OutLabels: n.OutLabels}
 
 	for i, l := range n.Layers {
 		dump.Weights[i] = make([][]float64, len(l.Neurons))
@@ -69,7 +71,7 @@ func FromDump(dump *NetworkDump) *neural.Network {
 		layers[i] = len(layer)
 	}
 
-	n := neural.NewNetwork(dump.Enters, layers)
+	n := neural.NewNetwork(dump.Enters, layers, dump.OutLabels)
 
 	for i, l := range n.Layers {
 		for j, n := range l.Neurons {
