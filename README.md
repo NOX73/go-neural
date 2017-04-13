@@ -15,7 +15,8 @@ After forking the repository from github.com/NOX73/go-neural this will be the ro
 * Implement rich measurements for the evaluation of the classifier
 * Simple data I/O for training / testing and libSVM and csv format
 * Establish a learning framework as engine package (using epochs, decays, interraters)
-* Provide another page using example projects including data
+* Implement rich measurements for the evaluation of regressors
+* Provide another repository using example projects including data
 * Pipelined learning in channels to find the optimum
 * Online learning with online evaluation
 
