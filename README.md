@@ -1,4 +1,4 @@
-go-neural
+gopher-neural
 ==============
 
 # Preface
@@ -17,6 +17,7 @@ After forking the repository from github.com/NOX73/go-neural this will be the ro
 * Establish a learning framework as engine package (using epochs, decays, interraters)
 * Provide another page using example projects including data
 * Pipelined learning in channels to find the optimum
+* Online learning with online evaluation
 
 ### Done so far
 
@@ -43,15 +44,15 @@ Create new network:
 
   //...
 
-  // Network has 9 enters and 3 layers 
+  // Network has 9 enters and 3 layers
   // ( 9 neurons, 9 neurons and 4 neurons).
   // Last layer is network output.
   n := neural.NewNetwork(9, []int{9,9,4})
   // Randomize sypaseses weights
   n.RandomizeSynapses()
-  
+
   result := n.Calculate([]float64{0,1,0,1,1,1,0,1,0})
-  
+
 ```
 
 # Persist network (deprecated)
@@ -111,4 +112,3 @@ For concurrent learn, calculate & dump neural network.
 # Live example (deprecated)
 
 Dirty live example: [https://github.com/NOX73/go-neural-play]
-
