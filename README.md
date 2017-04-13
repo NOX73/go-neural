@@ -8,22 +8,21 @@ This code was partly taken from github.com/NOX73/go-neural. For the implementati
 * Improved I/O functionality for training
 * Provide examples for the usage of the library
 
-### Roadmap
-
-After forking the repository from github.com/NOX73/go-neural this will be the roadmap so far (ordered by priority desc):
-
-* Implement rich measurements for the evaluation of the classifier
-* Simple data I/O for training / testing and libSVM and csv format
-* Establish a learning framework as engine package (using epochs, decays, interraters)
-* Implement rich measurements for the evaluation of regressors
-* Provide another repository using example projects including data
-* Pipelined learning in channels to find the optimum
-* Online learning with online evaluation
-
 ### Done so far
 
 * Changed I/O handling for JSON models
 * Added Sample and Set structure for handling of data sets
+* Implement rich measurements for the evaluation of the classifier
+
+### Roadmap
+
+* Simple data I/O for training / testing and libSVM and csv format
+* Establish a learning framework as engine package (using epochs, decays, interraters)
+* Provide another repository using example projects including data
+* Implement rich measurements for the evaluation of regressors
+* Pipelined learning in channels to find the optimum
+* Online learning with online evaluation
+* Feature normalizer (auto encoder also for alphanumerical features)
 
 # Install
 

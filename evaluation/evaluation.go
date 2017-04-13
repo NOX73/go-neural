@@ -1,13 +1,13 @@
 package evaluation
 
 import (
+	"fmt"
 	"math"
 
 	neural "github.com/flezzfx/gopher-neural"
 )
 
 // TODO (abresk) confusion matrix handling
-// TODO (abresk) get summary for class and overall
 // TODO (abresk) write tests for evaluation
 
 // Evaluation contains all the structures necessary for the evaluation
@@ -162,4 +162,21 @@ func shortEvaluation(n *neural.Network, in, ideal []float64) float64 {
 		e += math.Pow(out[i]-ideal[i], 2)
 	}
 	return e / 2
+}
+
+func (e *Evaluation) getSummary(label string) {
+	fmt.Printf("summary for class %v\n", label)
+	fmt.Printf(" * TP: %v TN: %v FP: %v FN: %v\n", e.getTruePositives(label), e.getTrueNegatives(label), e.getFalsePositives(label), e.getFalseNegatives(label))
+	fmt.Printf(" * Recall/Sensitivity: %v\n", e.getRecall(label))
+	fmt.Printf(" * Precision: %v\n", e.getPrecision(label))
+	fmt.Printf(" * Fallout/FalsePosRate: %v\n", e.getFallout(label))
+	fmt.Printf(" * False Discovey Rate: %v\n", e.getFalseDiscoveryRate(label))
+	fmt.Printf(" * Negative Prediction Rate: %v\n", e.getNegativePredictionValue(label))
+	fmt.Println("--")
+	fmt.Printf(" * Accuracy: %v\n", e.getAccuray(label))
+	fmt.Printf(" * F-Measure: %v\n", e.getFMeasure(label))
+	fmt.Printf(" * Balanced Accuracy: %v\n", e.getBalancedAccuracy(label))
+	fmt.Printf(" * Informedness: %v\n", e.getInformedness(label))
+	fmt.Printf(" * Markedness: %v\n", e.getMarkedness(label))
+
 }
