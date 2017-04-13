@@ -17,6 +17,7 @@ This code was partly taken from github.com/NOX73/go-neural. For the implementati
 ### Roadmap
 
 * Simple data I/O for training / testing and libSVM and csv format
+* Add labels to output neurons in network (also persist)
 * Establish a learning framework as engine package (using epochs, decays, interraters)
 * Provide another repository using example projects including data
 * Implement rich measurements for the evaluation of regressors

@@ -10,6 +10,7 @@ import (
 	"math/rand"
 	"os"
 	"strconv"
+	"strings"
 )
 
 // Set holds the samples and the output labels
@@ -115,6 +116,7 @@ func (s *Set) loadFromCSV(path string) (bool, error) {
 	if err != nil {
 		return false, fmt.Errorf("error while open file: %v", path)
 	}
+	defer f.Close()
 	r := csv.NewReader(bufio.NewReader(f))
 	for {
 		record, err := r.Read()
@@ -156,4 +158,87 @@ func (s *Set) createClassToLabel(mapping map[string]int) {
 	for i := range s.Samples {
 		s.Samples[i].ClassNumber = mapping[s.Samples[i].Label]
 	}
+}
+
+func (s *Set) loadFromSVMFile(path string) (bool, error) {
+	classNumbers := make(map[string]int)
+	classNumber := 0
+	highestIndex := scanSamples(path)
+	file, err := os.Open(path)
+	if err != nil {
+		return false, fmt.Errorf("error while opening file")
+	}
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		m, label, err := problemToMap(line)
+		if err != nil {
+			return false, fmt.Errorf("error while scanning files: %v", err)
+		}
+		var sample Sample
+		sample.Vector = make([]float64, highestIndex)
+		sample.Label = label
+		regression, err := strconv.ParseFloat(label, 64)
+		if err != nil {
+			sample.Value = regression
+		}
+		if _, ok := classNumbers[sample.Label]; !ok {
+			classNumbers[sample.Label] = classNumber
+			classNumber++
+		}
+		for i := 0; i < highestIndex; i++ {
+			if val, ok := m[i]; ok {
+				sample.Vector[i] = val
+			} else {
+				sample.Vector[i] = 0.0
+			}
+		}
+		s.Samples = append(s.Samples, sample)
+	}
+	return true, nil
+}
+
+func problemToMap(problem string) (map[int]float64, string, error) {
+	sliced := strings.Split(problem, " ")
+	m := make(map[int]float64)
+	label := sliced[0]
+	features := sliced[1:len(sliced)]
+	for feature := range features {
+		if features[feature] == "" {
+			continue
+		}
+		splitted := strings.Split(features[feature], ":")
+		idx, errIdx := strconv.Atoi(splitted[0])
+		value, errVal := strconv.ParseFloat(splitted[1], 64)
+		if errIdx == nil && errVal == nil {
+			m[idx] = value
+		}
+	}
+	return m, label, nil
+}
+
+// this function returns the highest index found
+func scanSamples(path string) int {
+	highest := 0
+	file, err := os.Open(path)
+	if err != nil {
+		fmt.Println("error while opening file")
+		os.Exit(-1)
+	}
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		m, _, err := problemToMap(scanner.Text())
+		if err != nil {
+			fmt.Printf("error while scanning files: %v", err)
+			os.Exit(-1)
+		}
+		for k := range m {
+			if k > highest {
+				highest = k
+			}
+		}
+	}
+	return highest
 }
