@@ -12,40 +12,38 @@ type NetworkDump struct {
 	Weights Weights
 }
 
-func DumpFromFile(path string) *NetworkDump {
+func DumpFromFile(path string) (*NetworkDump, error) {
 	b, err := ioutil.ReadFile(path)
-	if err != nil {
-		panic(err)
+	if nil != err {
+		return nil, err
 	}
-
 	dump := &NetworkDump{}
 	err = json.Unmarshal(b, dump)
-	if err != nil {
-		panic(err)
+	if nil != err {
+		return nil, err
 	}
 
-	return dump
+	return dump, nil
 }
 
-func FromFile(path string) *neural.Network {
-	dump := DumpFromFile(path)
+func FromFile(path string) (*neural.Network, error) {
+	dump, err := DumpFromFile(path)
+	if nil != err {
+		return nil, err
+	}
 	n := FromDump(dump)
-	return n
+	return n, nil
 }
 
-func ToFile(path string, n *neural.Network) {
+func ToFile(path string, n *neural.Network) error {
 	dump := ToDump(n)
-
-	DumpToFile(path, dump)
+	return DumpToFile(path, dump)
 }
 
-func DumpToFile(path string, dump *NetworkDump) {
+func DumpToFile(path string, dump *NetworkDump) error {
 	j, _ := json.Marshal(dump)
-
 	err := ioutil.WriteFile(path, j, 0644)
-	if err != nil {
-		panic(err)
-	}
+	return err
 }
 
 func ToDump(n *neural.Network) *NetworkDump {
