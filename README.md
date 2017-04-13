@@ -4,9 +4,9 @@ go-neural
 # Install
 
 ```
-  go get github.com/NOX73/go-neural
-  go get github.com/NOX73/go-neural/persist
-  go get github.com/NOX73/go-neural/learn
+  go get github.com/flezzfx/gopher-neural
+  go get github.com/flezzfx/gopher-neural/persist
+  go get github.com/flezzfx/gopher-neural/learn
 ```
 
 # Neural Network
@@ -15,7 +15,7 @@ Create new network:
 
 ```go
 
-  import "github.com/NOX73/go-neural"
+  import "github.com/flezzfx/gopher-neural"
 
   //...
 
@@ -35,7 +35,7 @@ Create new network:
 Save to file:
 
 ```go
-  import "github.com/NOX73/or-neural/persist"
+  import "github.com/flezzfx/gopher-neural/persist"
 
   persist.ToFile("/path/to/file.json", network)
 ```
@@ -43,7 +43,7 @@ Save to file:
 Load from file:
 
 ```go
-  import "github.com/NOX73/go-neural/persist"
+  import "github.com/flezzfx/gopher-neural/persist"
 
   network := persist.FromFile("/path/to/file.json")
 ```
@@ -51,7 +51,7 @@ Load from file:
 # Learning
 
 ```go
-  import "github.com/NOX73/go-neural/learn"
+  import "github.com/flezzfx/gopher-neural/learn"
 
   var input, idealOutput []float64
   // Learning speed [0..1]
@@ -79,6 +79,15 @@ For concurrent learn, calculate & dump neural network.
 
 	out := engine.Calculate([]float64{1, 2})
 ```
+
+# Roadmap
+
+After forking the repository from github.com/NOX73/go-neural this will be the roadmap so far: 
+* Establish a learning framework (using epochs, decays, interraters)
+* Change panic() handling
+* Simple data I/O for training / testing
+* Provide another page using example projects including data
+* Implement rich measurements for the evaluation of the classifier
 
 # Live example
 
