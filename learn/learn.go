@@ -1,14 +1,15 @@
 package learn
 
 import (
-	"github.com/NOX73/go-neural"
+	"github.com/flezzfx/gopher-neural"
 )
 
 type Deltas [][]float64
 
-type Sample struct {
-	In    []float64
-	Ideal []float64
+func Learner(n *neural.Network, samples []Sample, speed float64) {
+	for sample := range samples {
+		Learn(n, samples[sample].Vector, samples[sample].Output, speed)
+	}
 }
 
 func Learn(n *neural.Network, in, ideal []float64, speed float64) {
@@ -31,12 +32,10 @@ func Backpropagation(n *neural.Network, in, ideal []float64, speed float64) {
 		l := n.Layers[i]
 		deltas[i] = make([]float64, len(l.Neurons))
 		for j, n := range l.Neurons {
-
-			var sum float64 = 0
+			sum := 0.0
 			for k, s := range n.OutSynapses {
 				sum += s.Weight * deltas[i+1][k]
 			}
-
 			deltas[i][j] = n.Out * (1 - n.Out) * sum
 		}
 	}
