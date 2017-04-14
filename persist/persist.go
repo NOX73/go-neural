@@ -2,55 +2,55 @@ package persist
 
 import (
 	"encoding/json"
-	"github.com/NOX73/go-neural"
 	"io/ioutil"
+
+	"github.com/flezzfx/gopher-neural"
 )
 
 type Weights [][][]float64
 type NetworkDump struct {
-	Enters  int
-	Weights Weights
+	Enters    int
+	Weights   Weights
+	OutLabels map[int]string
 }
 
-func DumpFromFile(path string) *NetworkDump {
+func DumpFromFile(path string) (*NetworkDump, error) {
 	b, err := ioutil.ReadFile(path)
-	if err != nil {
-		panic(err)
+	if nil != err {
+		return nil, err
 	}
-
 	dump := &NetworkDump{}
 	err = json.Unmarshal(b, dump)
-	if err != nil {
-		panic(err)
+	if nil != err {
+		return nil, err
 	}
 
-	return dump
+	return dump, nil
 }
 
-func FromFile(path string) *neural.Network {
-	dump := DumpFromFile(path)
+func FromFile(path string) (*neural.Network, error) {
+	dump, err := DumpFromFile(path)
+	if nil != err {
+		return nil, err
+	}
 	n := FromDump(dump)
-	return n
+	return n, nil
 }
 
-func ToFile(path string, n *neural.Network) {
+func ToFile(path string, n *neural.Network) error {
 	dump := ToDump(n)
-
-	DumpToFile(path, dump)
+	return DumpToFile(path, dump)
 }
 
-func DumpToFile(path string, dump *NetworkDump) {
+func DumpToFile(path string, dump *NetworkDump) error {
 	j, _ := json.Marshal(dump)
-
 	err := ioutil.WriteFile(path, j, 0644)
-	if err != nil {
-		panic(err)
-	}
+	return err
 }
 
 func ToDump(n *neural.Network) *NetworkDump {
 
-	dump := &NetworkDump{Enters: len(n.Enters), Weights: make([][][]float64, len(n.Layers))}
+	dump := &NetworkDump{Enters: len(n.Enters), Weights: make([][][]float64, len(n.Layers)), OutLabels: n.OutLabels}
 
 	for i, l := range n.Layers {
 		dump.Weights[i] = make([][]float64, len(l.Neurons))
@@ -71,7 +71,7 @@ func FromDump(dump *NetworkDump) *neural.Network {
 		layers[i] = len(layer)
 	}
 
-	n := neural.NewNetwork(dump.Enters, layers)
+	n := neural.NewNetwork(dump.Enters, layers, dump.OutLabels)
 
 	for i, l := range n.Layers {
 		for j, n := range l.Neurons {

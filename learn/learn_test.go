@@ -1,10 +1,11 @@
 package learn
 
 import (
-	"github.com/NOX73/go-neural"
-	. "launchpad.net/gocheck"
 	"math/rand"
 	"testing"
+
+	"github.com/flezzfx/gopher-neural"
+	. "launchpad.net/gocheck"
 )
 
 type lessThenChecker struct {
