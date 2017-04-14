@@ -118,7 +118,7 @@ func (s *Set) distributionByClassNumber(number int) map[int]int {
 }
 
 // where the last dimension is the label
-func (s *Set) loadFromCSV(path string) (bool, error) {
+func (s *Set) LoadFromCSV(path string) (bool, error) {
 	classNumbers := make(map[string]int)
 	classNumber := 0
 	f, err := os.Open(path)
@@ -169,7 +169,7 @@ func (s *Set) createClassToLabel(mapping map[string]int) {
 	}
 }
 
-func (s *Set) loadFromSVMFile(path string) (bool, error) {
+func (s *Set) LoadFromSVMFile(path string) (bool, error) {
 	classNumbers := make(map[string]int)
 	classNumber := 0
 	highestIndex := scanSamples(path)
