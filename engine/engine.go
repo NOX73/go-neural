@@ -27,14 +27,14 @@ type Engine struct {
 	NetworkInput     int
 	NetworkLayer     []int
 	NetworkOutput    int
-	Data             learn.Set
+	Data             *learn.Set
 	WinnerNetwork    *neural.Network
 	WinnerEvaluation *evaluation.Evaluation
 	Verbose          bool
 }
 
 // NewEngine creates a new Engine object
-func NewEngine(hiddenLayer []int, data learn.Set) *Engine {
+func NewEngine(hiddenLayer []int, data *learn.Set) *Engine {
 	return &Engine{
 		NetworkInput:     len(data.Samples[0].Vector),
 		NetworkOutput:    len(data.Samples[0].Output),
@@ -58,7 +58,7 @@ func (e *Engine) Start(criterion, tries, epochs int, trainingSplit, learning, de
 	}
 	for try := 0; try < tries; try++ {
 		network := build(e.NetworkInput, e.NetworkLayer, e.Data.ClassToLabel)
-		training, validation := split(&e.Data, trainingSplit)
+		training, validation := split(e.Data, trainingSplit)
 		for ; learning > 0.0; learning -= decay {
 			run(network, training, learning, epochs)
 			evaluation := evaluate(network, validation, training)
