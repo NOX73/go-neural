@@ -1,109 +1,143 @@
 package engine
 
 import (
-	"github.com/NOX73/go-neural"
-	"github.com/NOX73/go-neural/learn"
-	"github.com/NOX73/go-neural/persist"
+	"fmt"
+	"math/rand"
+
+	neural "github.com/flezzfx/gopher-neural"
+	"github.com/flezzfx/gopher-neural/evaluation"
+	"github.com/flezzfx/gopher-neural/learn"
+	persist "github.com/flezzfx/gopher-neural/persist"
 )
 
 const (
-	learnChannelCapacity = 5
-	calcChannelCapacity = 5
-	dumpChannelCapacity = 5
+	// CriterionAccuracy decides evaluation by accuracy
+	CriterionAccuracy = 0
+	// CriterionBalancedAccuracy decides evaluation by balanced accuracy
+	CriterionBalancedAccuracy = 1
+	// CriterionFMeasure decides evaluation by f-measure
+	CriterionFMeasure = 2
+	runToken          = "."
+	epochToken        = ","
+	tryToken          = "*"
 )
 
-type Engine interface {
-	Start()
-	Learn(in, ideal []float64, speed float64)
-	Calculate([]float64) []float64
-	Dump() *persist.NetworkDump
+// Engine contains every necessary for starting the engine
+type Engine struct {
+	NetworkInput     int
+	NetworkLayer     []int
+	NetworkOutput    int
+	Data             learn.Set
+	WinnerNetwork    *neural.Network
+	WinnerEvaluation *evaluation.Evaluation
+	Verbose          bool
 }
 
-type engine struct {
-	Network          *neural.Network
-	LearnChannel      chan *request
-	CalculateChannel chan *request
-	DumpChannel      chan *request
-}
-
-type request []interface{}
-
-func New(n *neural.Network) Engine {
-	e := &engine{
-		Network:          n,
-		LearnChannel:      make(chan *request, learnChannelCapacity),
-		CalculateChannel: make(chan *request, calcChannelCapacity),
-		DumpChannel:      make(chan *request, dumpChannelCapacity),
-	}
-
-	return e
-}
-
-func (e *engine) Start() {
-	go e.loop()
-}
-
-func (e *engine) Learn(in, ideal []float64, speed float64) {
-	e.LearnChannel <- &request{&in, &ideal, speed}
-}
-
-func (e *engine) Calculate(in []float64) []float64 {
-	resp := make(chan *[]float64, 1)
-	e.CalculateChannel <- &request{&in, resp}
-	return *(<-resp)
-}
-
-func (e *engine) Dump() *persist.NetworkDump {
-	resp := make(chan *persist.NetworkDump, 1)
-	e.DumpChannel <- &request{resp}
-	return <-resp
-}
-
-func (e *engine) loop() {
-	for {
-
-		select {
-		case r := <-e.CalculateChannel:
-			e.calculate(r)
-		case r := <-e.DumpChannel:
-			e.dump(r)
-		default:
-		}
-
-		select {
-		case r := <-e.DumpChannel:
-			e.dump(r)
-		case r := <-e.CalculateChannel:
-			e.calculate(r)
-		case r := <-e.LearnChannel:
-			e.learn(r)
-		}
-
+// NewEngine creates a new Engine object
+func NewEngine(hiddenLayer []int, data learn.Set) *Engine {
+	return &Engine{
+		NetworkInput:     len(data.Samples[0].Vector),
+		NetworkOutput:    len(data.Samples[0].Output),
+		NetworkLayer:     hiddenLayer,
+		Data:             data,
+		WinnerNetwork:    build(len(data.Samples[0].Vector), hiddenLayer, data.ClassToLabel),
+		WinnerEvaluation: evaluation.NewEvaluation(data.GetClasses()),
+		Verbose:          false,
 	}
 }
 
-func (e *engine) learn(req *request) {
-	r := *req
-
-	in := r[0].(*[]float64)
-	ideal := r[1].(*[]float64)
-	speed := r[2].(float64)
-	learn.Learn(e.Network, *in, *ideal, speed)
+// SetVerbose set verbose mode default = false
+func (e *Engine) SetVerbose(verbose bool) {
+	e.Verbose = verbose
 }
 
-func (e *engine) calculate(req *request) {
-	r := *req
-
-	in := r[0].(*[]float64)
-	resp := r[1].(chan *[]float64)
-
-	res := e.Network.Calculate(*in)
-	resp <- &(res)
+// Start takes the paramter to start the engine and run it
+func (e *Engine) Start(criterion, tries, epochs int, trainingSplit, learning, decay float64) {
+	if e.Verbose {
+		fmt.Printf("start training")
+	}
+	for try := 0; try < tries; try++ {
+		network := build(e.NetworkInput, e.NetworkLayer, e.Data.ClassToLabel)
+		training, validation := split(&e.Data, trainingSplit)
+		for ; learning > 0.0; learning -= decay {
+			run(network, training, learning, epochs)
+			evaluation := evaluate(network, validation, training)
+			if compare(criterion, e.WinnerEvaluation, evaluation) {
+				e.WinnerNetwork = copy(network)
+				e.WinnerEvaluation = evaluation
+				if e.Verbose {
+					print(e.WinnerEvaluation)
+				}
+			}
+		}
+		fmt.Print(tryToken)
+	}
 }
 
-func (e *engine) dump(req *request) {
-	r := *req
-	resp := r[0].(chan *persist.NetworkDump)
+func print(e *evaluation.Evaluation) {
+	fmt.Printf("\n [Best]: %v acc / %v bacc / %v f1\n", e.GetOverallAccuracy(), e.GetOverallBalancedAccuracy(), e.GetOverallFMeasure())
+}
 
-	resp <- persist.ToDump(e.Network)
+func build(input int, hidden []int, labels map[int]string) *neural.Network {
+	hidden = append(hidden, len(labels))
+	network := neural.NewNetwork(input, hidden, labels)
+	network.RandomizeSynapses()
+	return network
+}
+
+func split(set *learn.Set, ratio float64) (*learn.Set, *learn.Set) {
+	multiplier := 100
+	normalizedRatio := int(ratio * float64(multiplier))
+	var training, evaluation learn.Set
+	training.ClassToLabel = set.ClassToLabel
+	evaluation.ClassToLabel = set.ClassToLabel
+	for i := range set.Samples {
+		if rand.Intn(multiplier) <= normalizedRatio {
+			training.Samples = append(training.Samples, set.Samples[i])
+		} else {
+			evaluation.Samples = append(evaluation.Samples, set.Samples[i])
+		}
+	}
+	return &training, &evaluation
+}
+
+func run(network *neural.Network, data *learn.Set, learning float64, epochs int) {
+	for e := 0; e < epochs; e++ {
+		for sample := range data.Samples {
+			learn.Learn(network, data.Samples[sample].Vector, data.Samples[sample].Output, learning)
+		}
+		fmt.Print(epochToken)
+	}
+	fmt.Print(runToken)
+}
+
+func evaluate(network *neural.Network, test *learn.Set, train *learn.Set) *evaluation.Evaluation {
+	evaluation := evaluation.NewEvaluation(train.GetClasses())
+	for sample := range test.Samples {
+		winner := network.CalculateWinnerLabel(test.Samples[sample].Vector)
+		evaluation.Add(test.Samples[sample].Label, winner)
+	}
+	return evaluation
+}
+
+func compare(criterion int, current *evaluation.Evaluation, try *evaluation.Evaluation) bool {
+	switch criterion {
+	case CriterionAccuracy:
+		if current.GetOverallAccuracy() < try.GetOverallAccuracy() {
+			return true
+		}
+	case CriterionBalancedAccuracy:
+		if current.GetOverallBalancedAccuracy() < try.GetOverallBalancedAccuracy() {
+			return true
+		}
+	case CriterionFMeasure:
+		if current.GetOverallFMeasure() < try.GetOverallFMeasure() {
+			return true
+		}
+	}
+	return false
+}
+
+func copy(from *neural.Network) *neural.Network {
+	return persist.FromDump(persist.ToDump(from))
 }
