@@ -28,7 +28,8 @@ func NewEvaluation(classes []string) *Evaluation {
 	return evaluation
 }
 
-func (e *Evaluation) add(labeledClass, predictedClass string) {
+// Add adds a new data point to the evaluation
+func (e *Evaluation) Add(labeledClass, predictedClass string) {
 	if _, ok := e.Confusion[labeledClass][predictedClass]; ok {
 		e.Confusion[labeledClass][predictedClass]++
 	} else {
@@ -36,11 +37,13 @@ func (e *Evaluation) add(labeledClass, predictedClass string) {
 	}
 }
 
-func (e *Evaluation) getTruePositives(label string) int {
+// GetTruePositives returns TP
+func (e *Evaluation) GetTruePositives(label string) int {
 	return e.Confusion[label][label]
 }
 
-func (e *Evaluation) getFalsePositives(label string) int {
+// GetFalsePositives returns FP
+func (e *Evaluation) GetFalsePositives(label string) int {
 	s := 0
 	for l := range e.Confusion {
 		if l != label {
@@ -50,7 +53,8 @@ func (e *Evaluation) getFalsePositives(label string) int {
 	return s
 }
 
-func (e *Evaluation) getTrueNegatives(label string) int {
+// GetTrueNegatives returns TN
+func (e *Evaluation) GetTrueNegatives(label string) int {
 	s := 0
 	for la := range e.Confusion {
 		if la != label {
@@ -64,7 +68,8 @@ func (e *Evaluation) getTrueNegatives(label string) int {
 	return s
 }
 
-func (e *Evaluation) getFalseNegatives(label string) int {
+// GetFalseNegatives returns FNs
+func (e *Evaluation) GetFalseNegatives(label string) int {
 	s := 0
 	for la := range e.Confusion[label] {
 		for l := range e.Confusion[la] {
@@ -76,114 +81,114 @@ func (e *Evaluation) getFalseNegatives(label string) int {
 	return s
 }
 
-// TP + FN
-func (e *Evaluation) getPositives(label string) int {
-	return e.getTruePositives(label) + e.getFalseNegatives(label)
+// GetPositives TP + FN
+func (e *Evaluation) GetPositives(label string) int {
+	return e.GetTruePositives(label) + e.GetFalseNegatives(label)
 }
 
-// FP + TN
-func (e *Evaluation) getNegatives(label string) int {
-	return e.getFalsePositives(label) + e.getTrueNegatives(label)
+// GetNegatives FP + TN
+func (e *Evaluation) GetNegatives(label string) int {
+	return e.GetFalsePositives(label) + e.GetTrueNegatives(label)
 }
 
-// (TP+TN) / (P+N)
-func (e *Evaluation) getAccuray(label string) float64 {
-	if float64(e.getPositives(label)+e.getNegatives(label)) == 0.0 {
+// GetAccuray (TP+TN) / (P+N)
+func (e *Evaluation) GetAccuray(label string) float64 {
+	if float64(e.GetPositives(label)+e.GetNegatives(label)) == 0.0 {
 		return 0.0
 	}
-	return float64(e.getTruePositives(label)+e.getTrueNegatives(label)) / float64(e.getPositives(label)+e.getNegatives(label))
+	return float64(e.GetTruePositives(label)+e.GetTrueNegatives(label)) / float64(e.GetPositives(label)+e.GetNegatives(label))
 }
 
-// TP/P, TP/(TP + FN)
-func (e *Evaluation) getRecall(label string) float64 {
-	if float64(e.getPositives(label)) == 0.0 {
+// GetRecall TP/P, TP/(TP + FN)
+func (e *Evaluation) GetRecall(label string) float64 {
+	if float64(e.GetPositives(label)) == 0.0 {
 		return 0.0
 	}
-	return float64(e.getTruePositives(label)) / float64(e.getPositives(label))
+	return float64(e.GetTruePositives(label)) / float64(e.GetPositives(label))
 }
 
-// like recall
-func (e *Evaluation) getSensitivity(label string) float64 {
-	return e.getRecall(label)
+// GetSensitivity like recall
+func (e *Evaluation) GetSensitivity(label string) float64 {
+	return e.GetRecall(label)
 }
 
-// TN / N, TN/(FP+TN)
-func (e *Evaluation) getSpecificity(label string) float64 {
-	if float64(e.getNegatives(label)) == 0.0 {
+// GetSpecificity TN / N, TN/(FP+TN)
+func (e *Evaluation) GetSpecificity(label string) float64 {
+	if float64(e.GetNegatives(label)) == 0.0 {
 		return 0.0
 	}
-	return float64(e.getTrueNegatives(label)) / float64(e.getNegatives(label))
+	return float64(e.GetTrueNegatives(label)) / float64(e.GetNegatives(label))
 }
 
-// TP/(TP+FP)
-func (e *Evaluation) getPrecision(label string) float64 {
-	if float64(e.getTruePositives(label)+e.getFalsePositives(label)) == 0.0 {
+// GetPrecision TP/(TP+FP)
+func (e *Evaluation) GetPrecision(label string) float64 {
+	if float64(e.GetTruePositives(label)+e.GetFalsePositives(label)) == 0.0 {
 		return 0.0
 	}
-	return float64(e.getTruePositives(label)) / float64(e.getTruePositives(label)+e.getFalsePositives(label))
+	return float64(e.GetTruePositives(label)) / float64(e.GetTruePositives(label)+e.GetFalsePositives(label))
 }
 
-// FP / N
-func (e *Evaluation) getFallout(label string) float64 {
-	if float64(e.getNegatives(label)) == 0.0 {
+// GetFallout FP / N
+func (e *Evaluation) GetFallout(label string) float64 {
+	if float64(e.GetNegatives(label)) == 0.0 {
 		return 0.0
 	}
-	return float64(e.getFalsePositives(label)) / float64(e.getNegatives(label))
+	return float64(e.GetFalsePositives(label)) / float64(e.GetNegatives(label))
 }
 
-// same as fallout
-func (e *Evaluation) getFalsePositiveRate(label string) float64 {
-	return e.getFallout(label)
+// GetFalsePositiveRate same as fallout
+func (e *Evaluation) GetFalsePositiveRate(label string) float64 {
+	return e.GetFallout(label)
 }
 
-// FP / (FP+TP)
-func (e *Evaluation) getFalseDiscoveryRate(label string) float64 {
-	if float64(e.getFalsePositives(label)+e.getTruePositives(label)) == 0.0 {
+// GetFalseDiscoveryRate FP / (FP+TP)
+func (e *Evaluation) GetFalseDiscoveryRate(label string) float64 {
+	if float64(e.GetFalsePositives(label)+e.GetTruePositives(label)) == 0.0 {
 		return 0.0
 	}
-	return float64(e.getFalsePositives(label)) / float64(e.getFalsePositives(label)+e.getTruePositives(label))
+	return float64(e.GetFalsePositives(label)) / float64(e.GetFalsePositives(label)+e.GetTruePositives(label))
 }
 
-// TN/(TN+FN)
-func (e *Evaluation) getNegativePredictionValue(label string) float64 {
-	if float64(e.getTrueNegatives(label)+e.getFalseNegatives(label)) == 0.0 {
+// GetNegativePredictionValue TN/(TN+FN)
+func (e *Evaluation) GetNegativePredictionValue(label string) float64 {
+	if float64(e.GetTrueNegatives(label)+e.GetFalseNegatives(label)) == 0.0 {
 		return 0.0
 	}
-	return float64(e.getTrueNegatives(label)) / float64(e.getTrueNegatives(label)+e.getFalseNegatives(label))
+	return float64(e.GetTrueNegatives(label)) / float64(e.GetTrueNegatives(label)+e.GetFalseNegatives(label))
 }
 
-// 2TP/(2TP+FP+FN)
-func (e *Evaluation) getFMeasure(label string) float64 {
-	if float64(2*e.getTruePositives(label)+e.getFalsePositives(label)+e.getFalseNegatives(label)) == 0.0 {
+// GetFMeasure 2TP/(2TP+FP+FN)
+func (e *Evaluation) GetFMeasure(label string) float64 {
+	if float64(2*e.GetTruePositives(label)+e.GetFalsePositives(label)+e.GetFalseNegatives(label)) == 0.0 {
 		return 0.0
 	}
-	return 2.0 * float64(e.getTruePositives(label)) / float64(2*e.getTruePositives(label)+e.getFalsePositives(label)+e.getFalseNegatives(label))
+	return 2.0 * float64(e.GetTruePositives(label)) / float64(2*e.GetTruePositives(label)+e.GetFalsePositives(label)+e.GetFalseNegatives(label))
 }
 
-// (TP/P + TN/N) / 2
-func (e *Evaluation) getBalancedAccuracy(label string) float64 {
+// GetBalancedAccuracy (TP/P + TN/N) / 2
+func (e *Evaluation) GetBalancedAccuracy(label string) float64 {
 	var positives, negatives float64
-	if float64(e.getPositives(label)) == 0.0 {
+	if float64(e.GetPositives(label)) == 0.0 {
 		positives = 0.0
 	} else {
-		positives = float64(e.getTruePositives(label)) / float64(e.getPositives(label))
+		positives = float64(e.GetTruePositives(label)) / float64(e.GetPositives(label))
 	}
-	if float64(e.getNegatives(label)) == 0.0 {
+	if float64(e.GetNegatives(label)) == 0.0 {
 		negatives = 0.0
 	} else {
-		negatives = float64(e.getTrueNegatives(label)) / float64(e.getNegatives(label))
+		negatives = float64(e.GetTrueNegatives(label)) / float64(e.GetNegatives(label))
 	}
 	return (positives + negatives) / 2.0
 }
 
-// Informedness = Sensitivity + Specificity − 1
-func (e *Evaluation) getInformedness(label string) float64 {
-	return e.getSensitivity(label) + e.getSpecificity(label) - 1.0
+// GetInformedness  = Sensitivity + Specificity − 1
+func (e *Evaluation) GetInformedness(label string) float64 {
+	return e.GetSensitivity(label) + e.GetSpecificity(label) - 1.0
 }
 
-// Markedness = Precision + NegativePredictionValue − 1
-func (e *Evaluation) getMarkedness(label string) float64 {
-	return e.getPrecision(label) + e.getNegativePredictionValue(label) - 1
+// GetMarkedness  = Precision + NegativePredictionValue − 1
+func (e *Evaluation) GetMarkedness(label string) float64 {
+	return e.GetPrecision(label) + e.GetNegativePredictionValue(label) - 1
 }
 
 // Math Evaluation with Least squares method.
@@ -197,19 +202,20 @@ func shortEvaluation(n *neural.Network, in, ideal []float64) float64 {
 	return e / 2
 }
 
-func (e *Evaluation) getSummary(label string) {
+// GetSummary returns a summary
+func (e *Evaluation) GetSummary(label string) {
 	fmt.Printf("summary for class %v\n", label)
-	fmt.Printf(" * TP: %v TN: %v FP: %v FN: %v\n", e.getTruePositives(label), e.getTrueNegatives(label), e.getFalsePositives(label), e.getFalseNegatives(label))
-	fmt.Printf(" * Recall/Sensitivity: %v\n", e.getRecall(label))
-	fmt.Printf(" * Precision: %v\n", e.getPrecision(label))
-	fmt.Printf(" * Fallout/FalsePosRate: %v\n", e.getFallout(label))
-	fmt.Printf(" * False Discovey Rate: %v\n", e.getFalseDiscoveryRate(label))
-	fmt.Printf(" * Negative Prediction Rate: %v\n", e.getNegativePredictionValue(label))
+	fmt.Printf(" * TP: %v TN: %v FP: %v FN: %v\n", e.GetTruePositives(label), e.GetTrueNegatives(label), e.GetFalsePositives(label), e.GetFalseNegatives(label))
+	fmt.Printf(" * Recall/Sensitivity: %v\n", e.GetRecall(label))
+	fmt.Printf(" * Precision: %v\n", e.GetPrecision(label))
+	fmt.Printf(" * Fallout/FalsePosRate: %v\n", e.GetFallout(label))
+	fmt.Printf(" * False Discovey Rate: %v\n", e.GetFalseDiscoveryRate(label))
+	fmt.Printf(" * Negative Prediction Rate: %v\n", e.GetNegativePredictionValue(label))
 	fmt.Println("--")
-	fmt.Printf(" * Accuracy: %v\n", e.getAccuray(label))
-	fmt.Printf(" * F-Measure: %v\n", e.getFMeasure(label))
-	fmt.Printf(" * Balanced Accuracy: %v\n", e.getBalancedAccuracy(label))
-	fmt.Printf(" * Informedness: %v\n", e.getInformedness(label))
-	fmt.Printf(" * Markedness: %v\n", e.getMarkedness(label))
+	fmt.Printf(" * Accuracy: %v\n", e.GetAccuray(label))
+	fmt.Printf(" * F-Measure: %v\n", e.GetFMeasure(label))
+	fmt.Printf(" * Balanced Accuracy: %v\n", e.GetBalancedAccuracy(label))
+	fmt.Printf(" * Informedness: %v\n", e.GetInformedness(label))
+	fmt.Printf(" * Markedness: %v\n", e.GetMarkedness(label))
 
 }
