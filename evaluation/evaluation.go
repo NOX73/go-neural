@@ -91,8 +91,8 @@ func (e *Evaluation) GetNegatives(label string) int {
 	return e.GetFalsePositives(label) + e.GetTrueNegatives(label)
 }
 
-// GetAccuray (TP+TN) / (P+N)
-func (e *Evaluation) GetAccuray(label string) float64 {
+// GetAccuracy (TP+TN) / (P+N)
+func (e *Evaluation) GetAccuracy(label string) float64 {
 	if float64(e.GetPositives(label)+e.GetNegatives(label)) == 0.0 {
 		return 0.0
 	}
@@ -181,6 +181,36 @@ func (e *Evaluation) GetBalancedAccuracy(label string) float64 {
 	return (positives + negatives) / 2.0
 }
 
+// GetOverallBalancedAccuracy calculates for the training evaluation
+func (e *Evaluation) GetOverallBalancedAccuracy() float64 {
+	classes := float64(len(e.Confusion))
+	sum := 0.0
+	for k := range e.Confusion {
+		sum += e.GetBalancedAccuracy(k)
+	}
+	return sum / classes
+}
+
+// GetOverallAccuracy calculates for the training evaluation
+func (e *Evaluation) GetOverallAccuracy() float64 {
+	classes := float64(len(e.Confusion))
+	sum := 0.0
+	for k := range e.Confusion {
+		sum += e.GetAccuracy(k)
+	}
+	return sum / classes
+}
+
+// GetOverallFMeasure calculates for the training evaluation
+func (e *Evaluation) GetOverallFMeasure() float64 {
+	classes := float64(len(e.Confusion))
+	sum := 0.0
+	for k := range e.Confusion {
+		sum += e.GetFMeasure(k)
+	}
+	return sum / classes
+}
+
 // GetInformedness  = Sensitivity + Specificity − 1
 func (e *Evaluation) GetInformedness(label string) float64 {
 	return e.GetSensitivity(label) + e.GetSpecificity(label) - 1.0
@@ -212,7 +242,7 @@ func (e *Evaluation) GetSummary(label string) {
 	fmt.Printf(" * False Discovey Rate: %v\n", e.GetFalseDiscoveryRate(label))
 	fmt.Printf(" * Negative Prediction Rate: %v\n", e.GetNegativePredictionValue(label))
 	fmt.Println("--")
-	fmt.Printf(" * Accuracy: %v\n", e.GetAccuray(label))
+	fmt.Printf(" * Accuracy: %v\n", e.GetAccuracy(label))
 	fmt.Printf(" * F-Measure: %v\n", e.GetFMeasure(label))
 	fmt.Printf(" * Balanced Accuracy: %v\n", e.GetBalancedAccuracy(label))
 	fmt.Printf(" * Informedness: %v\n", e.GetInformedness(label))
