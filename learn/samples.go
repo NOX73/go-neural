@@ -36,6 +36,15 @@ func NewSet() *Set {
 	}
 }
 
+// GetClasses returns the classes in the set
+func (s *Set) GetClasses() []string {
+	classes := make([]string, len(s.ClassToLabel))
+	for k, v := range s.ClassToLabel {
+		classes[k] = v
+	}
+	return classes
+}
+
 func (s *Set) add(vector, output []float64, label string, classNumber int, value float64) {
 	var sample Sample
 	sample.Vector = vector

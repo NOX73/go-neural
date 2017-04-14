@@ -22,6 +22,7 @@ This code was partly taken from github.com/NOX73/go-neural. For the implementati
 * Establish a learning framework as engine package (using epochs, decays, interraters)
 * Confusion matrix handling
 * Provide another repository using example projects including data
+* Improve the split data set handling by classes
 * Implement rich measurements for the evaluation of regressors
 * Pipelined learning in channels to find the optimum
 * Online learning with online evaluation
@@ -36,6 +37,20 @@ This code was partly taken from github.com/NOX73/go-neural. For the implementati
   go get github.com/flezzfx/gopher-neural/engine
   go get github.com/flezzfx/gopher-neural/evaluation
 ```
+
+# Explaining engine
+
+one epoch = one forward pass and one backward pass of all the training examples
+batch size = the number of training examples in one forward/backward pass. The higher the batch size, the more memory space you'll need.
+number of iterations = number of passes, each pass using [batch size] number of examples. To be clear, one pass = one forward pass + one backward pass (we do not count the forward pass and backward pass as two different passes).
+
+
+learningRate = <number>
+n x epoch
+	then learningRate - decay
+
+  epochs per learning-decay
+
 
 # Neural Network
 
@@ -107,8 +122,6 @@ For concurrent learn, calculate & dump neural network.
 
 	out := engine.Calculate([]float64{1, 2})
 ```
-
-
 
 
 
