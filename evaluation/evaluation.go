@@ -88,11 +88,17 @@ func (e *Evaluation) getNegatives(label string) int {
 
 // (TP+TN) / (P+N)
 func (e *Evaluation) getAccuray(label string) float64 {
+	if float64(e.getPositives(label)+e.getNegatives(label)) == 0.0 {
+		return 0.0
+	}
 	return float64(e.getTruePositives(label)+e.getTrueNegatives(label)) / float64(e.getPositives(label)+e.getNegatives(label))
 }
 
 // TP/P, TP/(TP + FN)
 func (e *Evaluation) getRecall(label string) float64 {
+	if float64(e.getPositives(label)) == 0.0 {
+		return 0.0
+	}
 	return float64(e.getTruePositives(label)) / float64(e.getPositives(label))
 }
 
@@ -103,16 +109,25 @@ func (e *Evaluation) getSensitivity(label string) float64 {
 
 // TN / N, TN/(FP+TN)
 func (e *Evaluation) getSpecificity(label string) float64 {
+	if float64(e.getNegatives(label)) == 0.0 {
+		return 0.0
+	}
 	return float64(e.getTrueNegatives(label)) / float64(e.getNegatives(label))
 }
 
 // TP/(TP+FP)
 func (e *Evaluation) getPrecision(label string) float64 {
+	if float64(e.getTruePositives(label)+e.getFalsePositives(label)) == 0.0 {
+		return 0.0
+	}
 	return float64(e.getTruePositives(label)) / float64(e.getTruePositives(label)+e.getFalsePositives(label))
 }
 
 // FP / N
 func (e *Evaluation) getFallout(label string) float64 {
+	if float64(e.getNegatives(label)) == 0.0 {
+		return 0.0
+	}
 	return float64(e.getFalsePositives(label)) / float64(e.getNegatives(label))
 }
 
@@ -123,23 +138,41 @@ func (e *Evaluation) getFalsePositiveRate(label string) float64 {
 
 // FP / (FP+TP)
 func (e *Evaluation) getFalseDiscoveryRate(label string) float64 {
+	if float64(e.getFalsePositives(label)+e.getTruePositives(label)) == 0.0 {
+		return 0.0
+	}
 	return float64(e.getFalsePositives(label)) / float64(e.getFalsePositives(label)+e.getTruePositives(label))
 }
 
 // TN/(TN+FN)
 func (e *Evaluation) getNegativePredictionValue(label string) float64 {
+	if float64(e.getTrueNegatives(label)+e.getFalseNegatives(label)) == 0.0 {
+		return 0.0
+	}
 	return float64(e.getTrueNegatives(label)) / float64(e.getTrueNegatives(label)+e.getFalseNegatives(label))
 }
 
 // 2TP/(2TP+FP+FN)
 func (e *Evaluation) getFMeasure(label string) float64 {
+	if float64(2*e.getTruePositives(label)+e.getFalsePositives(label)+e.getFalseNegatives(label)) == 0.0 {
+		return 0.0
+	}
 	return 2.0 * float64(e.getTruePositives(label)) / float64(2*e.getTruePositives(label)+e.getFalsePositives(label)+e.getFalseNegatives(label))
 }
 
 // (TP/P + TN/N) / 2
 func (e *Evaluation) getBalancedAccuracy(label string) float64 {
-	positives := float64(e.getTruePositives(label)) / float64(e.getPositives(label))
-	negatives := float64(e.getTrueNegatives(label)) / float64(e.getNegatives(label))
+	var positives, negatives float64
+	if float64(e.getPositives(label)) == 0.0 {
+		positives = 0.0
+	} else {
+		positives = float64(e.getTruePositives(label)) / float64(e.getPositives(label))
+	}
+	if float64(e.getNegatives(label)) == 0.0 {
+		negatives = 0.0
+	} else {
+		negatives = float64(e.getTrueNegatives(label)) / float64(e.getNegatives(label))
+	}
 	return (positives + negatives) / 2.0
 }
 
