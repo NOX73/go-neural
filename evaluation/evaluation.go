@@ -82,7 +82,7 @@ func (e *Evaluation) GetFalseNegatives(label string) int {
 	s := 0
 	for la := range e.Confusion[label] {
 		for l := range e.Confusion[la] {
-			if l != label {
+			if l != label && la == label {
 				s += e.Confusion[la][l]
 			}
 		}
@@ -244,7 +244,7 @@ func (e *Evaluation) AddDistance(n *neural.Network, in, ideal []float64) float64
 
 // GetDistance returns the distance from the evaluation
 func (e *Evaluation) GetDistance() float64 {
-	return e.OverallDistance
+	return e.OverallDistance / float64(e.Wrong+e.Correct)
 }
 
 // GetCorrectRatio returns correct classified samples ratio

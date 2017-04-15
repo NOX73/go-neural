@@ -63,10 +63,10 @@ func (e *Engine) GetWinner() (*neural.Network, *evaluation.Evaluation) {
 
 // Start takes the paramter to start the engine and run it
 func (e *Engine) Start(criterion, tries, epochs int, trainingSplit, startLearning, decay float64) {
+	network := build(e.NetworkInput, e.NetworkLayer, e.Data.ClassToLabel)
+	training, validation := split(e.Data, trainingSplit)
 	for try := 0; try < tries; try++ {
 		learning := startLearning
-		network := build(e.NetworkInput, e.NetworkLayer, e.Data.ClassToLabel)
-		training, validation := split(e.Data, trainingSplit)
 		if e.Verbose {
 			fmt.Printf("\n> start try %v. training / test: %v / %v (%v)\n", (try + 1), len(training.Samples), len(validation.Samples), trainingSplit)
 		}
@@ -88,7 +88,7 @@ func (e *Engine) Start(criterion, tries, epochs int, trainingSplit, startLearnin
 }
 
 func print(e *evaluation.Evaluation) {
-	fmt.Printf("\n [Best] acc: %v  / bacc: %v / f1: %v \n", e.GetOverallAccuracy(), e.GetOverallBalancedAccuracy(), e.GetOverallFMeasure())
+	fmt.Printf("\n [Best] acc: %v  / bacc: %v / f1: %v / correct: %v / distance: %v \n", e.GetOverallAccuracy(), e.GetOverallBalancedAccuracy(), e.GetOverallFMeasure(), e.GetCorrectRatio(), e.GetDistance())
 }
 
 func build(input int, hidden []int, labels map[int]string) *neural.Network {
@@ -156,7 +156,6 @@ func compare(criterion int, current *evaluation.Evaluation, try *evaluation.Eval
 			return true
 		}
 	case CriterionDistance:
-		fmt.Printf("%v vs. %v\n", current.GetDistance(), try.GetDistance())
 		if current.GetDistance() > try.GetDistance() {
 			return true
 		}
