@@ -12,7 +12,10 @@ import (
 
 // Evaluation contains all the structures necessary for the evaluation
 type Evaluation struct {
-	Confusion map[string]map[string]int
+	Confusion       map[string]map[string]int
+	Correct         int
+	Wrong           int
+	OverallDistance float64
 }
 
 // NewEvaluation creates a new evaluation object
@@ -21,6 +24,7 @@ func NewEvaluation(classes []string) *Evaluation {
 		Confusion: make(map[string]map[string]int),
 	}
 	for i := range classes {
+		evaluation.Confusion[classes[i]] = make(map[string]int)
 		for j := range classes {
 			evaluation.Confusion[classes[i]][classes[j]] = 0
 		}
@@ -34,6 +38,11 @@ func (e *Evaluation) Add(labeledClass, predictedClass string) {
 		e.Confusion[labeledClass][predictedClass]++
 	} else {
 		e.Confusion[labeledClass][predictedClass] = 1
+	}
+	if labeledClass == predictedClass {
+		e.Correct++
+	} else {
+		e.Wrong++
 	}
 }
 
@@ -221,15 +230,26 @@ func (e *Evaluation) GetMarkedness(label string) float64 {
 	return e.GetPrecision(label) + e.GetNegativePredictionValue(label) - 1
 }
 
-// Math Evaluation with Least squares method.
-func shortEvaluation(n *neural.Network, in, ideal []float64) float64 {
+// AddDistance adds distance between ideal output and output of the network
+func (e *Evaluation) AddDistance(n *neural.Network, in, ideal []float64) float64 {
 	// This function was part of the former go-neural and moved to this package.
 	out := n.Calculate(in)
-	var e float64
+	var d float64
 	for i := range out {
-		e += math.Pow(out[i]-ideal[i], 2)
+		d += math.Pow(out[i]-ideal[i], 2)
 	}
-	return e / 2
+	e.OverallDistance += d / 2.0
+	return d / 2.0
+}
+
+// GetDistance returns the distance from the evaluation
+func (e *Evaluation) GetDistance() float64 {
+	return e.OverallDistance
+}
+
+// GetCorrectRatio returns correct classified samples ratio
+func (e *Evaluation) GetCorrectRatio() float64 {
+	return float64(e.Correct) / float64(e.Wrong+e.Correct)
 }
 
 // GetSummary returns a summary

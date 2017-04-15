@@ -17,9 +17,14 @@ const (
 	CriterionBalancedAccuracy = 1
 	// CriterionFMeasure decides evaluation by f-measure
 	CriterionFMeasure = 2
-	runToken          = "."
-	epochToken        = ","
-	tryToken          = "*"
+	// CriterionSimple decides on simple wrong/correct ratio
+	CriterionSimple = 3
+	// CriterionDistance decieds evaluation by distance to ideal output
+	CriterionDistance = 4
+	// some output tokens
+	runToken   = ","
+	epochToken = "."
+	tryToken   = "*"
 )
 
 // Engine contains every necessary for starting the engine
@@ -29,7 +34,7 @@ type Engine struct {
 	NetworkOutput    int
 	Data             *learn.Set
 	WinnerNetwork    *neural.Network
-	WinnerEvaluation *evaluation.Evaluation
+	WinnerEvaluation evaluation.Evaluation
 	Verbose          bool
 }
 
@@ -41,7 +46,7 @@ func NewEngine(hiddenLayer []int, data *learn.Set) *Engine {
 		NetworkLayer:     hiddenLayer,
 		Data:             data,
 		WinnerNetwork:    build(len(data.Samples[0].Vector), hiddenLayer, data.ClassToLabel),
-		WinnerEvaluation: evaluation.NewEvaluation(data.GetClasses()),
+		WinnerEvaluation: *evaluation.NewEvaluation(data.GetClasses()),
 		Verbose:          false,
 	}
 }
@@ -51,31 +56,39 @@ func (e *Engine) SetVerbose(verbose bool) {
 	e.Verbose = verbose
 }
 
+// GetWinner returns the winner network from training
+func (e *Engine) GetWinner() (*neural.Network, *evaluation.Evaluation) {
+	return e.WinnerNetwork, &e.WinnerEvaluation
+}
+
 // Start takes the paramter to start the engine and run it
-func (e *Engine) Start(criterion, tries, epochs int, trainingSplit, learning, decay float64) {
-	if e.Verbose {
-		fmt.Printf("start training")
-	}
+func (e *Engine) Start(criterion, tries, epochs int, trainingSplit, startLearning, decay float64) {
 	for try := 0; try < tries; try++ {
+		learning := startLearning
 		network := build(e.NetworkInput, e.NetworkLayer, e.Data.ClassToLabel)
 		training, validation := split(e.Data, trainingSplit)
+		if e.Verbose {
+			fmt.Printf("\n> start try %v. training / test: %v / %v (%v)\n", (try + 1), len(training.Samples), len(validation.Samples), trainingSplit)
+		}
 		for ; learning > 0.0; learning -= decay {
-			run(network, training, learning, epochs)
+			train(network, training, learning, epochs)
 			evaluation := evaluate(network, validation, training)
-			if compare(criterion, e.WinnerEvaluation, evaluation) {
+			if compare(criterion, &e.WinnerEvaluation, evaluation) {
 				e.WinnerNetwork = copy(network)
-				e.WinnerEvaluation = evaluation
+				e.WinnerEvaluation = *evaluation
 				if e.Verbose {
-					print(e.WinnerEvaluation)
+					print(&e.WinnerEvaluation)
 				}
 			}
 		}
-		fmt.Print(tryToken)
+		if e.Verbose {
+			fmt.Print(tryToken + "\n")
+		}
 	}
 }
 
 func print(e *evaluation.Evaluation) {
-	fmt.Printf("\n [Best]: %v acc / %v bacc / %v f1\n", e.GetOverallAccuracy(), e.GetOverallBalancedAccuracy(), e.GetOverallFMeasure())
+	fmt.Printf("\n [Best] acc: %v  / bacc: %v / f1: %v \n", e.GetOverallAccuracy(), e.GetOverallBalancedAccuracy(), e.GetOverallFMeasure())
 }
 
 func build(input int, hidden []int, labels map[int]string) *neural.Network {
@@ -101,7 +114,7 @@ func split(set *learn.Set, ratio float64) (*learn.Set, *learn.Set) {
 	return &training, &evaluation
 }
 
-func run(network *neural.Network, data *learn.Set, learning float64, epochs int) {
+func train(network *neural.Network, data *learn.Set, learning float64, epochs int) {
 	for e := 0; e < epochs; e++ {
 		for sample := range data.Samples {
 			learn.Learn(network, data.Samples[sample].Vector, data.Samples[sample].Output, learning)
@@ -114,6 +127,7 @@ func run(network *neural.Network, data *learn.Set, learning float64, epochs int)
 func evaluate(network *neural.Network, test *learn.Set, train *learn.Set) *evaluation.Evaluation {
 	evaluation := evaluation.NewEvaluation(train.GetClasses())
 	for sample := range test.Samples {
+		evaluation.AddDistance(network, test.Samples[sample].Vector, test.Samples[sample].Output)
 		winner := network.CalculateWinnerLabel(test.Samples[sample].Vector)
 		evaluation.Add(test.Samples[sample].Label, winner)
 	}
@@ -121,6 +135,9 @@ func evaluate(network *neural.Network, test *learn.Set, train *learn.Set) *evalu
 }
 
 func compare(criterion int, current *evaluation.Evaluation, try *evaluation.Evaluation) bool {
+	if current.Correct+current.Wrong == 0 {
+		return true
+	}
 	switch criterion {
 	case CriterionAccuracy:
 		if current.GetOverallAccuracy() < try.GetOverallAccuracy() {
@@ -132,6 +149,15 @@ func compare(criterion int, current *evaluation.Evaluation, try *evaluation.Eval
 		}
 	case CriterionFMeasure:
 		if current.GetOverallFMeasure() < try.GetOverallFMeasure() {
+			return true
+		}
+	case CriterionSimple:
+		if current.GetCorrectRatio() < try.GetCorrectRatio() {
+			return true
+		}
+	case CriterionDistance:
+		fmt.Printf("%v vs. %v\n", current.GetDistance(), try.GetDistance())
+		if current.GetDistance() > try.GetDistance() {
 			return true
 		}
 	}
