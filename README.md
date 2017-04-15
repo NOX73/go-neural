@@ -4,7 +4,7 @@ gopher-neural
 
 
 # Preface
-This code was partly taken from github.com/NOX73/go-neural. For the implementation of the core algorithmn all credits belong to NOX73. The fork to gopher-neural was made to pursue the following goals:
+This code was partly taken from github.com/NOX73/go-neural. For the implementation of the core algorithm all credits belong to NOX73. The fork to gopher-neural was made to pursue the following goals:
 * Build a training / testing framework around this algorithm
 * Build rich measurement mechanisms to control the training
 * Improved I/O functionality for training
