@@ -1,5 +1,7 @@
 gopher-neural
 ==============
+![gopher-neural-logo](http://alexander.bre.sk/x/gopher-neural-small.png " The Gopher Neural logo ")
+
 
 # Preface
 This code was partly taken from github.com/NOX73/go-neural. For the implementation of the core algorithmn all credits belong to NOX73. The fork to gopher-neural was made to pursue the following goals:
@@ -27,6 +29,13 @@ This code was partly taken from github.com/NOX73/go-neural. For the implementati
 * Pipelined learning in channels to find the optimum
 * Online learning with online evaluation
 * Feature normalizer (auto encoder also for alphanumerical features)
+
+### Future ReadMe contents
+* How to Install
+* Sidekick to the examples for quickstart
+* Fast training and storage of network with csv and svm format i/o
+* Explain the algorithm, the engine and the terms
+* Explain the evaluation in short
 
 # Install
 
@@ -108,23 +117,3 @@ You can get estimate of learning quality:
 ```go
   e := learn.Evaluation(network, in, idealOut)
 ```
-
-# Engine  (deprecated)
-
-For concurrent learn, calculate & dump neural network.
-
-```go
-	network := neural.NewNetwork(2, []int{2, 2})
-	engine := New(network)
-	engine.Start()
-
-	engine.Learn([]float64{1, 2}, []float64{3, 3}, 0.1)
-
-	out := engine.Calculate([]float64{1, 2})
-```
-
-
-
-# Live example (deprecated)
-
-Dirty live example: [https://github.com/NOX73/go-neural-play]
