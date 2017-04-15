@@ -13,6 +13,10 @@ import (
 	"strings"
 )
 
+const (
+	classYes = 1.0
+)
+
 // Set holds the samples and the output labels
 type Set struct {
 	Samples      []Sample
@@ -156,7 +160,17 @@ func (s *Set) LoadFromCSV(path string) (bool, error) {
 		s.Samples = append(s.Samples, sample)
 	}
 	s.createClassToLabel(classNumbers)
+	s.addOutputVectors()
 	return true, nil
+}
+
+func (s *Set) addOutputVectors() {
+	dim := len(s.ClassToLabel)
+	for sample := range s.Samples {
+		v := make([]float64, dim)
+		v[s.Samples[sample].ClassNumber] = classYes
+		s.Samples[sample].Output = v
+	}
 }
 
 func (s *Set) createClassToLabel(mapping map[string]int) {

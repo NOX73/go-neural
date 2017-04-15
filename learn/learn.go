@@ -1,8 +1,6 @@
 package learn
 
-import (
-	"github.com/flezzfx/gopher-neural"
-)
+import "github.com/flezzfx/gopher-neural"
 
 type Deltas [][]float64
 
