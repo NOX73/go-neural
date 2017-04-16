@@ -2,6 +2,8 @@ gopher-neural
 ==============
 ![gopher-neural-logo](http://alexander.bre.sk/x/gopher-neural-small.png " The Gopher Neural logo ")
 
+# Quickstart
+See examples here: https://github.com/flezzfx/gopher-neural-examples
 
 # Preface
 This code was partly taken from github.com/NOX73/go-neural. For the implementation of the core algorithm all credits belong to NOX73. The fork to gopher-neural was made to pursue the following goals:
