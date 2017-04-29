@@ -11,6 +11,10 @@ import (
 )
 
 const (
+	// Classification engine used for classification
+	Classification = 0
+	// Regresssion engine used for regression
+	Regresssion = 1
 	// CriterionAccuracy decides evaluation by accuracy
 	CriterionAccuracy = 0
 	// CriterionBalancedAccuracy decides evaluation by balanced accuracy
@@ -36,10 +40,11 @@ type Engine struct {
 	WinnerNetwork    *neural.Network
 	WinnerEvaluation evaluation.Evaluation
 	Verbose          bool
+	Type             int
 }
 
 // NewEngine creates a new Engine object
-func NewEngine(hiddenLayer []int, data *learn.Set) *Engine {
+func NewEngine(usage int, hiddenLayer []int, data *learn.Set) *Engine {
 	return &Engine{
 		NetworkInput:     len(data.Samples[0].Vector),
 		NetworkOutput:    len(data.Samples[0].Output),
@@ -48,6 +53,7 @@ func NewEngine(hiddenLayer []int, data *learn.Set) *Engine {
 		WinnerNetwork:    build(len(data.Samples[0].Vector), hiddenLayer, data.ClassToLabel),
 		WinnerEvaluation: *evaluation.NewEvaluation(data.GetClasses()),
 		Verbose:          false,
+		Type:             usage,
 	}
 }
 
