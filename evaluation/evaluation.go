@@ -252,6 +252,23 @@ func (e *Evaluation) GetCorrectRatio() float64 {
 	return float64(e.Correct) / float64(e.Wrong+e.Correct)
 }
 
+// PrintConfusionMatrix prints the confusion matrix of the evaluation
+func (e *Evaluation) PrintConfusionMatrix() {
+	fmt.Printf("\t|")
+	for k := range e.Confusion {
+		fmt.Printf("%v\t|", k)
+	}
+	fmt.Print("\n")
+	for cl := range e.Confusion {
+		fmt.Printf("%v\t|", cl)
+		for c := range e.Confusion[cl] {
+			fmt.Printf("%v\t|", e.Confusion[cl][c])
+		}
+		fmt.Printf("\n")
+	}
+
+}
+
 // GetSummary returns a summary
 func (e *Evaluation) GetSummary(label string) {
 	fmt.Printf("summary for class %v\n", label)

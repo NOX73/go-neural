@@ -3,7 +3,9 @@ gopher-neural
 ![gopher-neural-logo](http://alexander.bre.sk/x/gopher-neural-small.png " The Gopher Neural logo ")
 
 # Quickstart
-See examples here: https://github.com/flezzfx/gopher-neural-examples
+* See examples here: https://github.com/flezzfx/gopher-neural-examples
+* Version 1 roadmap: https://github.com/flezzfx/gopher-neural/projects/1
+* Vversion 1.1 roadmap: https://github.com/flezzfx/gopher-neural/projects/2 
 
 # Preface
 This code was partly taken from github.com/NOX73/go-neural. For the implementation of the core algorithm all credits belong to NOX73. The fork to gopher-neural was made to pursue the following goals:
@@ -13,19 +15,17 @@ This code was partly taken from github.com/NOX73/go-neural. For the implementati
 * Provide examples for the usage of the library
 
 ### Done so far
-
 * Changed I/O handling for JSON models
 * Added Sample and Set structure for handling of data sets
 * Implement rich measurements for the evaluation of the classifier
 * Simple data I/O for training / testing and libSVM and csv format
 * Added labels to output neurons in network and persist
 * Just output label of neuron with most confidence
+* Establish a learning framework as engine package (using epochs, decays, interraters)
+* Provide another repository using example projects including data
+* Confusion matrix handling
 
 ### Roadmap
-
-* Establish a learning framework as engine package (using epochs, decays, interraters)
-* Confusion matrix handling
-* Provide another repository using example projects including data
 * Improve the split data set handling by classes
 * Implement rich measurements for the evaluation of regressors
 * Pipelined learning in channels to find the optimum
@@ -33,8 +33,6 @@ This code was partly taken from github.com/NOX73/go-neural. For the implementati
 * Feature normalizer (auto encoder also for alphanumerical features)
 
 ### Future ReadMe contents
-* How to Install
-* Sidekick to the examples for quickstart
 * Fast training and storage of network with csv and svm format i/o
 * Explain the algorithm, the engine and the terms
 * Explain the evaluation in short
@@ -65,45 +63,55 @@ n x epoch
 
 # Neural Network
 
-Create new network:
+## Create new network
 
 ```go
 
   import "github.com/flezzfx/gopher-neural"
-
-  //...
-
   // Network has 9 enters and 3 layers
-  // ( 9 neurons, 9 neurons and 4 neurons).
-  // Last layer is network output.
-  n := neural.NewNetwork(9, []int{9,9,4})
+  // ( 9 neurons, 9 neurons and 2 neurons).
+  // Last layer is network output (2 neurons).
+  // For these last neurons we need labels (like: spam, nospam, positive, negative)
+  labels := make(map[int]string)
+  labels[0] = "positive"
+  labels[1] = "negative"
+  n := neural.NewNetwork(9, []int{9,9,2}, map[int])
   // Randomize sypaseses weights
   n.RandomizeSynapses()
 
+  // now you can calculate on this network (of course it is not trained yet)
+  // (for the training you can use then engine)
   result := n.Calculate([]float64{0,1,0,1,1,1,0,1,0})
 
 ```
 
-# Persist network (deprecated)
+## Persist network (deprecated)
 
-Save to file:
-
-```go
-  import "github.com/flezzfx/gopher-neural/persist"
-
-  persist.ToFile("/path/to/file.json", network)
-```
-
-Load from file:
+### Save to file
 
 ```go
   import "github.com/flezzfx/gopher-neural/persist"
 
-  network := persist.FromFile("/path/to/file.json")
+  err := persist.ToFile("/path/to/file.json", network)
+  if err != nil {
+    fmt.Printf("error: %v\n", err)
+  }
 ```
 
-# Learning (deprecated)
+### Load from file
 
+```go
+  import "github.com/flezzfx/gopher-neural/persist"
+
+  network, err := persist.FromFile("/path/to/file.json")
+  if err != nil {
+    fmt.Printf("error: %v\n", err)
+  }
+```
+
+# Learning
+
+If you want to train the network on your own, you can use the Learn function. This fuction helps you with one learning step through the network. If you want to learn a network
 ```go
   import "github.com/flezzfx/gopher-neural/learn"
 
