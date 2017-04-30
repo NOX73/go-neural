@@ -7,7 +7,6 @@ import (
 	neural "github.com/flezzfx/gopher-neural"
 )
 
-// TODO (abresk) confusion matrix handling
 // TODO (abresk) write tests for evaluation
 
 // Evaluation contains all the structures necessary for the evaluation
@@ -16,11 +15,14 @@ type Evaluation struct {
 	Correct         int
 	Wrong           int
 	OverallDistance float64
+	Usage           int
+	Threshold       float64
 }
 
 // NewEvaluation creates a new evaluation object
-func NewEvaluation(classes []string) *Evaluation {
+func NewEvaluation(usage int, classes []string) *Evaluation {
 	evaluation := &Evaluation{
+		Usage:     usage,
 		Confusion: make(map[string]map[string]int),
 	}
 	for i := range classes {
@@ -30,6 +32,11 @@ func NewEvaluation(classes []string) *Evaluation {
 		}
 	}
 	return evaluation
+}
+
+// SetRegressionThreshold sets the threshold if you are trying to do Pos / Neg with a regressor
+func (e *Evaluation) SetRegressionThreshold(threshold float64) {
+	e.Threshold = threshold
 }
 
 // Add adds a new data point to the evaluation
@@ -43,6 +50,15 @@ func (e *Evaluation) Add(labeledClass, predictedClass string) {
 		e.Correct++
 	} else {
 		e.Wrong++
+	}
+}
+
+// AddRegression add a predicted regresssion value to tht set
+func (e *Evaluation) AddRegression(label, predicted float64) {
+	if math.Abs(label-predicted) >= e.Threshold {
+		e.Wrong++
+	} else {
+		e.Correct++
 	}
 }
 
@@ -267,6 +283,14 @@ func (e *Evaluation) PrintConfusionMatrix() {
 		fmt.Printf("\n")
 	}
 
+}
+
+// GetRegressionSummary returns a summary of the evaluated regression
+func (e *Evaluation) GetRegressionSummary() {
+	fmt.Println("summary")
+	fmt.Printf("correct: %v\n", e.Correct)
+	fmt.Printf("wrong: %v\n", e.Wrong)
+	fmt.Printf("ratio: %v\n", float64(e.Correct)/float64(e.Correct+e.Wrong))
 }
 
 // GetSummary returns a summary

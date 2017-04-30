@@ -7,14 +7,10 @@ import (
 	neural "github.com/flezzfx/gopher-neural"
 	"github.com/flezzfx/gopher-neural/evaluation"
 	"github.com/flezzfx/gopher-neural/learn"
-	persist "github.com/flezzfx/gopher-neural/persist"
+	"github.com/flezzfx/gopher-neural/persist"
 )
 
 const (
-	// Classification engine used for classification
-	Classification = 0
-	// Regresssion engine used for regression
-	Regresssion = 1
 	// CriterionAccuracy decides evaluation by accuracy
 	CriterionAccuracy = 0
 	// CriterionBalancedAccuracy decides evaluation by balanced accuracy
@@ -33,33 +29,46 @@ const (
 
 // Engine contains every necessary for starting the engine
 type Engine struct {
-	NetworkInput     int
-	NetworkLayer     []int
-	NetworkOutput    int
-	Data             *learn.Set
-	WinnerNetwork    *neural.Network
-	WinnerEvaluation evaluation.Evaluation
-	Verbose          bool
-	Type             int
+	NetworkInput        int
+	NetworkLayer        []int
+	NetworkOutput       int
+	Data                *learn.Set
+	WinnerNetwork       *neural.Network
+	WinnerEvaluation    evaluation.Evaluation
+	Verbose             bool
+	Usage               int
+	RegressionThreshold float64
 }
 
 // NewEngine creates a new Engine object
 func NewEngine(usage int, hiddenLayer []int, data *learn.Set) *Engine {
+	var outputLength int
+	if neural.Regression == usage {
+		outputLength = 1
+	} else {
+		outputLength = len(data.Samples[0].Output)
+	}
 	return &Engine{
-		NetworkInput:     len(data.Samples[0].Vector),
-		NetworkOutput:    len(data.Samples[0].Output),
-		NetworkLayer:     hiddenLayer,
-		Data:             data,
-		WinnerNetwork:    build(len(data.Samples[0].Vector), hiddenLayer, data.ClassToLabel),
-		WinnerEvaluation: *evaluation.NewEvaluation(data.GetClasses()),
-		Verbose:          false,
-		Type:             usage,
+		NetworkInput:        len(data.Samples[0].Vector),
+		NetworkOutput:       outputLength,
+		NetworkLayer:        hiddenLayer,
+		Data:                data,
+		WinnerNetwork:       build(usage, len(data.Samples[0].Vector), hiddenLayer, data.ClassToLabel),
+		WinnerEvaluation:    *evaluation.NewEvaluation(usage, data.GetClasses()),
+		Verbose:             false,
+		Usage:               usage,
+		RegressionThreshold: 0.0,
 	}
 }
 
 // SetVerbose set verbose mode default = false
 func (e *Engine) SetVerbose(verbose bool) {
 	e.Verbose = verbose
+}
+
+// SetRegressionThreshold sets the evaluation threshold for the regression
+func (e *Engine) SetRegressionThreshold(threshold float64) {
+	e.RegressionThreshold = threshold
 }
 
 // GetWinner returns the winner network from training
@@ -69,17 +78,17 @@ func (e *Engine) GetWinner() (*neural.Network, *evaluation.Evaluation) {
 
 // Start takes the paramter to start the engine and run it
 func (e *Engine) Start(criterion, tries, epochs int, trainingSplit, startLearning, decay float64) {
-	network := build(e.NetworkInput, e.NetworkLayer, e.Data.ClassToLabel)
-	training, validation := split(e.Data, trainingSplit)
+	network := build(e.Usage, e.NetworkInput, e.NetworkLayer, e.Data.ClassToLabel)
+	training, validation := split(e.Usage, e.Data, trainingSplit)
 	for try := 0; try < tries; try++ {
 		learning := startLearning
 		if e.Verbose {
 			fmt.Printf("\n> start try %v. training / test: %v / %v (%v)\n", (try + 1), len(training.Samples), len(validation.Samples), trainingSplit)
 		}
 		for ; learning > 0.0; learning -= decay {
-			train(network, training, learning, epochs)
-			evaluation := evaluate(network, validation, training)
-			if compare(criterion, &e.WinnerEvaluation, evaluation) {
+			train(e.Usage, network, training, learning, epochs)
+			evaluation := evaluate(e.Usage, network, validation, training, e.RegressionThreshold)
+			if compare(e.Usage, criterion, &e.WinnerEvaluation, evaluation) {
 				e.WinnerNetwork = copy(network)
 				e.WinnerEvaluation = *evaluation
 				if e.Verbose {
@@ -94,17 +103,17 @@ func (e *Engine) Start(criterion, tries, epochs int, trainingSplit, startLearnin
 }
 
 func print(e *evaluation.Evaluation) {
-	fmt.Printf("\n [Best] acc: %v  / bacc: %v / f1: %v / correct: %v / distance: %v \n", e.GetOverallAccuracy(), e.GetOverallBalancedAccuracy(), e.GetOverallFMeasure(), e.GetCorrectRatio(), e.GetDistance())
+	fmt.Printf("\n [Best] acc: %v  / bacc: %v / f1: %v / correct: %v / distance: %v\n", e.GetOverallAccuracy(), e.GetOverallBalancedAccuracy(), e.GetOverallFMeasure(), e.GetCorrectRatio(), e.GetDistance())
 }
 
-func build(input int, hidden []int, labels map[int]string) *neural.Network {
+func build(usage int, input int, hidden []int, labels map[int]string) *neural.Network {
 	hidden = append(hidden, len(labels))
 	network := neural.NewNetwork(input, hidden, labels)
 	network.RandomizeSynapses()
 	return network
 }
 
-func split(set *learn.Set, ratio float64) (*learn.Set, *learn.Set) {
+func split(usage int, set *learn.Set, ratio float64) (*learn.Set, *learn.Set) {
 	multiplier := 100
 	normalizedRatio := int(ratio * float64(multiplier))
 	var training, evaluation learn.Set
@@ -120,7 +129,7 @@ func split(set *learn.Set, ratio float64) (*learn.Set, *learn.Set) {
 	return &training, &evaluation
 }
 
-func train(network *neural.Network, data *learn.Set, learning float64, epochs int) {
+func train(usage int, network *neural.Network, data *learn.Set, learning float64, epochs int) {
 	for e := 0; e < epochs; e++ {
 		for sample := range data.Samples {
 			learn.Learn(network, data.Samples[sample].Vector, data.Samples[sample].Output, learning)
@@ -130,17 +139,23 @@ func train(network *neural.Network, data *learn.Set, learning float64, epochs in
 	fmt.Print(runToken)
 }
 
-func evaluate(network *neural.Network, test *learn.Set, train *learn.Set) *evaluation.Evaluation {
-	evaluation := evaluation.NewEvaluation(train.GetClasses())
+func evaluate(usage int, network *neural.Network, test *learn.Set, train *learn.Set, regressionThreshold float64) *evaluation.Evaluation {
+	evaluation := evaluation.NewEvaluation(usage, train.GetClasses())
+	evaluation.SetRegressionThreshold(regressionThreshold)
 	for sample := range test.Samples {
 		evaluation.AddDistance(network, test.Samples[sample].Vector, test.Samples[sample].Output)
-		winner := network.CalculateWinnerLabel(test.Samples[sample].Vector)
-		evaluation.Add(test.Samples[sample].Label, winner)
+		if neural.Classification == usage {
+			winner := network.CalculateWinnerLabel(test.Samples[sample].Vector)
+			evaluation.Add(test.Samples[sample].Label, winner)
+		} else {
+			prediction := network.Calculate(test.Samples[sample].Vector)
+			evaluation.AddRegression(test.Samples[sample].Value, prediction[0])
+		}
 	}
 	return evaluation
 }
 
-func compare(criterion int, current *evaluation.Evaluation, try *evaluation.Evaluation) bool {
+func compare(usage int, criterion int, current *evaluation.Evaluation, try *evaluation.Evaluation) bool {
 	if current.Correct+current.Wrong == 0 {
 		return true
 	}
