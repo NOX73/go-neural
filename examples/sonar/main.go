@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/flezzfx/gopher-neural"
 	"github.com/flezzfx/gopher-neural/engine"
 	"github.com/flezzfx/gopher-neural/learn"
 	"github.com/flezzfx/gopher-neural/persist"
@@ -12,19 +13,19 @@ const (
 	dataFile      = "data.csv"
 	networkFile   = "network.json"
 	tries         = 1
-	epochs        = 1 //100
+	epochs        = 100
 	trainingSplit = 0.7
 	learningRate  = 0.4
 	decay         = 0.005
 )
 
 func main() {
-	data := learn.NewSet()
+	data := learn.NewSet(neural.Classification)
 	ok, err := data.LoadFromCSV(dataFile)
 	if !ok || nil != err {
 		fmt.Printf("something went wrong -> %v", err)
 	}
-	e := engine.NewEngine([]int{100}, data)
+	e := engine.NewEngine(neural.Classification, []int{100}, data)
 	e.SetVerbose(true)
 	e.Start(engine.CriterionDistance, tries, epochs, trainingSplit, learningRate, decay)
 	network, evaluation := e.GetWinner()
@@ -46,9 +47,9 @@ func main() {
 	w := network2.CalculateWinnerLabel(data.Samples[0].Vector)
 	fmt.Printf("%v -> %v\n", data.Samples[0].Label, w)
 	w = network2.CalculateWinnerLabel(data.Samples[70].Vector)
-        fmt.Printf("%v -> %v\n", data.Samples[70].Label, w)
+	fmt.Printf("%v -> %v\n", data.Samples[70].Label, w)
 	w = network2.CalculateWinnerLabel(data.Samples[120].Vector)
-        fmt.Printf("%v -> %v\n", data.Samples[120].Label, w)
+	fmt.Printf("%v -> %v\n", data.Samples[120].Label, w)
 
 	// print confusion matrix
 	fmt.Println(" * Confusion Matrix *")
