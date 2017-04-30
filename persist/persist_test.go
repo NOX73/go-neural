@@ -1,7 +1,7 @@
 package persist
 
 import (
-	"github.com/NOX73/go-neural"
+	"github.com/flezzfx/gopher-neural"
 	. "launchpad.net/gocheck"
 	"testing"
 )
@@ -19,9 +19,11 @@ func (s *SuiteT) TestPersist(c *C) {
 	n.RandomizeSynapses()
 
 	path := "/tmp/network.json"
-	ToFile(path, n)
+	err := ToFile(path, n)
 
-	n2 := FromFile(path)
+	c.Assert(err, Equals, nil)
+
+	n2, err := FromFile(path)
 
 	c.Assert(n2.Enters, HasLen, len(n.Enters))
 	c.Assert(n2.Layers, HasLen, len(n.Layers))

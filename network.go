@@ -3,19 +3,25 @@ package neural
 import "fmt"
 import "math/rand"
 
-func NewNetwork(in int, layers []int) *Network {
+// TODO (abresk) write tests for CalculateLabels, CalculateWinnerLabel
+
+// Network contains all the necessary information to use the neural network
+type Network struct {
+	Enters    []*Enter
+	Layers    []*Layer
+	Out       []float64 `json:"-"`
+	OutLabels map[int]string
+}
+
+// NewNetwork creates a new neural network
+func NewNetwork(in int, layers []int, labels map[int]string) *Network {
 	n := &Network{
-		Enters: make([]*Enter, 0, in),
-		Layers: make([]*Layer, 0, len(layers)),
+		Enters:    make([]*Enter, 0, in),
+		Layers:    make([]*Layer, 0, len(layers)),
+		OutLabels: labels,
 	}
 	n.init(in, layers, NewLogisticFunc(1))
 	return n
-}
-
-type Network struct {
-	Enters []*Enter
-	Layers []*Layer
-	Out    []float64 `json:"-"`
 }
 
 func (n *Network) init(in int, layers []int, aFunc ActivationFunction) {
@@ -100,6 +106,28 @@ func (n *Network) Calculate(enters []float64) []float64 {
 	n.generateOut()
 
 	return n.Out
+}
+
+func (n *Network) CalculateLabels(enters []float64) map[string]float64 {
+	results := make(map[string]float64)
+	out := n.Calculate(enters)
+	for index, label := range n.OutLabels {
+		results[label] = out[index]
+	}
+	return results
+}
+
+func (n *Network) CalculateWinnerLabel(enters []float64) string {
+	calculatedLabels := n.CalculateLabels(enters)
+	winnerValue := 0.0
+	winnerLabel := ""
+	for label, value := range calculatedLabels {
+		if value > winnerValue {
+			winnerValue = value
+			winnerLabel = label
+		}
+	}
+	return winnerLabel
 }
 
 func (n *Network) RandomizeSynapses() {

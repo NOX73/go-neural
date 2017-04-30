@@ -2,55 +2,59 @@ package persist
 
 import (
 	"encoding/json"
-	"github.com/NOX73/go-neural"
 	"io/ioutil"
+	"strconv"
+
+	"github.com/flezzfx/gopher-neural"
 )
 
 type Weights [][][]float64
 type NetworkDump struct {
-	Enters  int
-	Weights Weights
+	Enters    int
+	Weights   Weights
+	OutLabels map[string]string
 }
 
-func DumpFromFile(path string) *NetworkDump {
+func DumpFromFile(path string) (*NetworkDump, error) {
 	b, err := ioutil.ReadFile(path)
-	if err != nil {
-		panic(err)
+	if nil != err {
+		return nil, err
 	}
-
 	dump := &NetworkDump{}
 	err = json.Unmarshal(b, dump)
-	if err != nil {
-		panic(err)
+	if nil != err {
+		return nil, err
 	}
 
-	return dump
+	return dump, nil
 }
 
-func FromFile(path string) *neural.Network {
-	dump := DumpFromFile(path)
+func FromFile(path string) (*neural.Network, error) {
+	dump, err := DumpFromFile(path)
+	if nil != err {
+		return nil, err
+	}
 	n := FromDump(dump)
-	return n
+	return n, nil
 }
 
-func ToFile(path string, n *neural.Network) {
+func ToFile(path string, n *neural.Network) error {
 	dump := ToDump(n)
-
-	DumpToFile(path, dump)
+	return DumpToFile(path, dump)
 }
 
-func DumpToFile(path string, dump *NetworkDump) {
-	j, _ := json.Marshal(dump)
-
-	err := ioutil.WriteFile(path, j, 0644)
+func DumpToFile(path string, dump *NetworkDump) error {
+	j, err := json.Marshal(dump)
 	if err != nil {
-		panic(err)
+		return err
 	}
+	err = ioutil.WriteFile(path, j, 0644)
+	return err
 }
 
 func ToDump(n *neural.Network) *NetworkDump {
-
-	dump := &NetworkDump{Enters: len(n.Enters), Weights: make([][][]float64, len(n.Layers))}
+	labels := intToStringMap(n.OutLabels)
+	dump := &NetworkDump{Enters: len(n.Enters), Weights: make([][][]float64, len(n.Layers)), OutLabels: labels}
 
 	for i, l := range n.Layers {
 		dump.Weights[i] = make([][]float64, len(l.Neurons))
@@ -61,7 +65,6 @@ func ToDump(n *neural.Network) *NetworkDump {
 			}
 		}
 	}
-
 	return dump
 }
 
@@ -70,8 +73,8 @@ func FromDump(dump *NetworkDump) *neural.Network {
 	for i, layer := range dump.Weights {
 		layers[i] = len(layer)
 	}
-
-	n := neural.NewNetwork(dump.Enters, layers)
+	labels := stringToIntMap(dump.OutLabels)
+	n := neural.NewNetwork(dump.Enters, layers, labels)
 
 	for i, l := range n.Layers {
 		for j, n := range l.Neurons {
@@ -82,4 +85,24 @@ func FromDump(dump *NetworkDump) *neural.Network {
 	}
 
 	return n
+}
+
+func intToStringMap(m map[int]string) map[string]string {
+	ms := make(map[string]string)
+	for k, v := range m {
+		ms[strconv.Itoa(k)] = v
+	}
+	return ms
+}
+
+func stringToIntMap(m map[string]string) map[int]string {
+	mi := make(map[int]string)
+	for k, v := range m {
+		index, err := strconv.Atoi(k)
+		if err != nil {
+			panic(err)
+		}
+		mi[index] = v
+	}
+	return mi
 }
