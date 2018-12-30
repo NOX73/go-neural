@@ -35,7 +35,7 @@ Create new network:
 Save to file:
 
 ```go
-  import "github.com/NOX73/or-neural/persist"
+  import "github.com/NOX73/go-neural/persist"
 
   persist.ToFile("/path/to/file.json", network)
 ```
