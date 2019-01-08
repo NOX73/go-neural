@@ -1,6 +1,9 @@
 package neural
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 import "math/rand"
 
 func NewNetwork(in int, layers []int) *Network {
@@ -103,10 +106,12 @@ func (n *Network) Calculate(enters []float64) []float64 {
 }
 
 func (n *Network) RandomizeSynapses() {
+	rand.Seed(time.Now().Unix())
+
 	for _, l := range n.Layers {
 		for _, n := range l.Neurons {
 			for _, s := range n.InSynapses {
-				s.Weight = 2 * (rand.Float64() - 0.5)
+				s.Weight = rand.Float64() - 0.5
 			}
 		}
 	}
